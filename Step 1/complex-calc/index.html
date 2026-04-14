@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="af-ZA">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <meta name="description" content="Boerseker herfinansiering kwalifiseerder — tel jou bates op en sien wat jy kan leen.">
+    <title>Kwalifiseer vir Herfinansiering — Boerseker</title>
+
+    <!-- Vue 3 production CDN (single dependency, ~35KB gzipped, cached from simple-calc) -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+    <style>
+      /* ============================================================
+         1. DESIGN TOKENS — same brand vocabulary as simple-calc
+         ============================================================ */
+      :root {
+        /* Brand */
+        --color-primary: #fe8500;
+        --color-primary-soft: #fff4e8;
+        --color-primary-hover: #e57600;
+        --color-success: #16a34a;
+        --color-success-soft: #dcfce7;
+        --color-neutral: #ffffff;
+        --color-black: #000000;
+
+        /* Surfaces & text */
+        --color-bg: #fafaf9;
+        --color-surface: #ffffff;
+        --color-ink: #1c1c1c;
+        --color-muted: #6b6b6b;
+        --color-subtle: #f5f5f4;
+        --color-border: #e7e5e4;
+        --color-track: #f1efed;
+        --color-danger: #c2410c;
+
+        /* Spacing */
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-5: 24px;
+        --space-6: 32px;
+        --space-7: 48px;
+
+        /* Radii */
+        --radius-sm: 8px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+        --radius-pill: 999px;
+
+        /* Type */
+        --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+        /* Shadows */
+        --shadow-card: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+        --shadow-cta: 0 2px 4px rgba(254,133,0,.12), 0 8px 20px rgba(254,133,0,.18);
+        --shadow-bar: 0 1px 0 rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+
+        /* Motion */
+        --duration-fast: 180ms;
+        --duration-base: 240ms;
+        --duration-slow: 380ms;
+        --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      /* ============================================================
+         2. STANDALONE PAGE BASELINE (won't apply when embedded inline)
+         ============================================================ */
+      html, body {
+        margin: 0;
+        background: var(--color-bg);
+        font-family: var(--font-stack);
+        min-height: 100vh;
+      }
+      body {
+        color: var(--color-ink);
+      }
+
+      /* ============================================================
+         3. SCOPED RESET — namespaced under .boerseker-complex-calc
+         ============================================================ */
+      .boerseker-complex-calc,
+      .boerseker-complex-calc *,
+      .boerseker-complex-calc *::before,
+      .boerseker-complex-calc *::after {
+        box-sizing: border-box;
+      }
+      [v-cloak] { display: none !important; }
+
+      /* ============================================================
+         4. ROOT
+         ============================================================ */
+      .boerseker-complex-calc {
+        font-family: var(--font-stack);
+        color: var(--color-ink);
+        line-height: 1.5;
+        max-width: 640px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      /* ============================================================
+         5. STICKY TOP BAR
+         ============================================================ */
+      .top-bar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--color-surface);
+        padding: var(--space-4) var(--space-5) var(--space-5);
+        box-shadow: var(--shadow-bar);
+        border-bottom: 1px solid var(--color-border);
+      }
+      .top-bar-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: var(--space-3);
+        gap: var(--space-3);
+      }
+      .top-bar-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--color-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .top-bar-percent {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--color-primary);
+        font-variant-numeric: tabular-nums;
+      }
+      .top-bar-percent.is-reached {
+        color: var(--color-success);
+      }
+      .progress-track {
+        position: relative;
+        height: 12px;
+        background: var(--color-track);
+        border-radius: var(--radius-pill);
+        overflow: hidden;
+      }
+      .progress-fill {
+        position: absolute;
+        inset: 0 auto 0 0;
+        background: linear-gradient(90deg, var(--color-primary), var(--color-primary-hover));
+        border-radius: var(--radius-pill);
+        transition: width 600ms var(--ease-out), background 400ms var(--ease-out);
+        will-change: width;
+      }
+      .progress-fill.is-reached {
+        background: linear-gradient(90deg, var(--color-success), #15803d);
+      }
+      .top-bar-numbers {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-top: var(--space-3);
+        gap: var(--space-3);
+      }
+      .top-bar-current {
+        font-size: 1.375rem;
+        font-weight: 700;
+        color: var(--color-ink);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
+      }
+      .top-bar-goal {
+        font-size: 0.875rem;
+        color: var(--color-muted);
+        font-variant-numeric: tabular-nums;
+      }
+      .top-bar-message {
+        font-size: 0.8125rem;
+        color: var(--color-muted);
+        margin: var(--space-2) 0 0;
+      }
+      .top-bar-message.is-reached {
+        color: var(--color-success);
+        font-weight: 600;
+      }
+      .top-bar-edit {
+        display: inline-block;
+        margin-top: var(--space-2);
+        font-size: 0.75rem;
+        color: var(--color-muted);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .top-bar-edit:hover { color: var(--color-ink); }
+
+      /* ============================================================
+         6. MAIN CALC AREA
+         ============================================================ */
+      .calc-main {
+        padding: var(--space-5);
+      }
+      .section-heading {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--color-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin: 0 0 var(--space-3);
+      }
+
+      /* ============================================================
+         7. ADD-ASSET CARD
+         ============================================================ */
+      .add-card {
+        background: var(--color-surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-card);
+        padding: var(--space-5);
+        margin-bottom: var(--space-6);
+      }
+      .add-field {
+        margin-bottom: var(--space-5);
+      }
+      .add-field:last-of-type { margin-bottom: var(--space-4); }
+      .add-field-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--color-ink);
+        margin: 0 0 var(--space-2);
+      }
+
+      /* Chip groups */
+      .chip-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 14px;
+        background: var(--color-surface);
+        border: 1.5px solid var(--color-border);
+        border-radius: var(--radius-pill);
+        font-family: inherit;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--color-ink);
+        cursor: pointer;
+        transition: all var(--duration-fast) var(--ease-out);
+        white-space: nowrap;
+      }
+      .chip:hover {
+        border-color: var(--color-primary);
+        background: var(--color-primary-soft);
+      }
+      .chip.is-active {
+        background: var(--color-primary);
+        border-color: var(--color-primary);
+        color: var(--color-neutral);
+        font-weight: 600;
+      }
+      .chip.is-active:hover {
+        background: var(--color-primary-hover);
+        border-color: var(--color-primary-hover);
+      }
+      .chip-icon { font-size: 1rem; line-height: 1; }
+
+      /* Currency input */
+      .add-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius-md);
+        padding: var(--space-3) var(--space-4);
+        background: var(--color-neutral);
+        transition: border-color var(--duration-fast) var(--ease-out),
+                    box-shadow var(--duration-fast) var(--ease-out);
+      }
+      .add-input-wrapper:focus-within {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 4px var(--color-primary-soft);
+      }
+      .add-input-prefix {
+        font-size: 1.375rem;
+        font-weight: 600;
+        color: var(--color-muted);
+        line-height: 1;
+      }
+      .add-input {
+        flex: 1;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        font-size: 1.375rem;
+        font-weight: 600;
+        color: var(--color-ink);
+        font-family: inherit;
+        padding: 0;
+        letter-spacing: 0.02em;
+      }
+      .add-input::placeholder {
+        color: #c4c0bb;
+        font-weight: 500;
+      }
+
+      /* Voeg by button */
+      .voeg-by {
+        display: block;
+        width: 100%;
+        padding: 14px 22px;
+        margin-top: var(--space-3);
+        background: var(--color-primary);
+        color: var(--color-neutral);
+        border: 0;
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: var(--shadow-cta);
+        transition: transform var(--duration-fast) var(--ease-out),
+                    background var(--duration-fast) var(--ease-out),
+                    opacity var(--duration-fast) var(--ease-out);
+      }
+      .voeg-by:hover:not(:disabled) {
+        background: var(--color-primary-hover);
+        transform: translateY(-1px);
+      }
+      .voeg-by:active:not(:disabled) { transform: translateY(0); }
+      .voeg-by:disabled {
+        background: var(--color-track);
+        color: #a8a29e;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      .voeg-by.is-flash {
+        background: var(--color-success);
+        animation: flash 600ms var(--ease-out);
+      }
+      @keyframes flash {
+        0%   { transform: scale(1); }
+        40%  { transform: scale(1.02); }
+        100% { transform: scale(1); }
+      }
+
+      /* ============================================================
+         8. ASSET LIST
+         ============================================================ */
+      .list-section {
+        margin-bottom: var(--space-6);
+      }
+      .asset-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+      .asset-card {
+        display: grid;
+        grid-template-columns: 44px 1fr auto;
+        align-items: center;
+        gap: var(--space-3);
+        background: var(--color-surface);
+        border-radius: var(--radius-md);
+        padding: var(--space-3) var(--space-4);
+        box-shadow: var(--shadow-card);
+      }
+      .asset-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--color-primary-soft);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.375rem;
+        line-height: 1;
+      }
+      .asset-body {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .asset-title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--color-ink);
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+      }
+      .asset-value {
+        font-variant-numeric: tabular-nums;
+        color: var(--color-muted);
+        font-weight: 500;
+        font-size: 0.875rem;
+      }
+      .asset-meta {
+        font-size: 0.75rem;
+        color: var(--color-muted);
+      }
+      .asset-meta strong {
+        color: var(--color-primary);
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+      .asset-delete {
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        color: var(--color-muted);
+        font-size: 1.125rem;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background var(--duration-fast) var(--ease-out),
+                    color var(--duration-fast) var(--ease-out);
+      }
+      .asset-delete:hover {
+        background: var(--color-subtle);
+        color: var(--color-danger);
+      }
+
+      .empty-state {
+        background: var(--color-subtle);
+        border: 1.5px dashed var(--color-border);
+        border-radius: var(--radius-md);
+        padding: var(--space-5);
+        text-align: center;
+        color: var(--color-muted);
+        font-size: 0.9375rem;
+      }
+      .empty-state-icon {
+        font-size: 1.75rem;
+        display: block;
+        margin-bottom: var(--space-2);
+      }
+
+      /* ============================================================
+         9. ADVANCED DISCLOSURE
+         ============================================================ */
+      .advanced {
+        background: var(--color-surface);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-card);
+        margin-bottom: var(--space-6);
+        overflow: hidden;
+      }
+      .advanced-summary {
+        list-style: none;
+        cursor: pointer;
+        padding: var(--space-4) var(--space-5);
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--color-muted);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        user-select: none;
+      }
+      .advanced-summary::-webkit-details-marker { display: none; }
+      .advanced-summary::after {
+        content: "▾";
+        font-size: 0.75rem;
+        transition: transform var(--duration-fast) var(--ease-out);
+      }
+      .advanced[open] .advanced-summary::after { transform: rotate(180deg); }
+      .advanced-body {
+        padding: 0 var(--space-5) var(--space-5);
+        border-top: 1px solid var(--color-border);
+      }
+      .advanced-field {
+        margin-top: var(--space-4);
+      }
+      .advanced-field-label {
+        display: block;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--color-ink);
+        margin-bottom: var(--space-2);
+      }
+      .advanced-field-help {
+        font-size: 0.75rem;
+        color: var(--color-muted);
+        margin: var(--space-1) 0 0;
+      }
+
+      /* ============================================================
+         10. GATED CTA AT BOTTOM
+         ============================================================ */
+      .cta-bottom {
+        display: block;
+        width: 100%;
+        padding: 18px 22px;
+        background: var(--color-primary);
+        color: var(--color-neutral);
+        border: 0;
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 1.0625rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: var(--shadow-cta);
+        transition: transform var(--duration-fast) var(--ease-out),
+                    background var(--duration-fast) var(--ease-out);
+      }
+      .cta-bottom:hover:not(:disabled) {
+        background: var(--color-primary-hover);
+        transform: translateY(-1px);
+      }
+      .cta-bottom:disabled {
+        background: var(--color-track);
+        color: #a8a29e;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      .cta-bottom.is-reached {
+        background: var(--color-success);
+      }
+      .cta-bottom.is-reached:hover:not(:disabled) {
+        background: #15803d;
+      }
+
+      /* ============================================================
+         11. LEAD FORM MODAL
+         ============================================================ */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(28, 28, 28, 0.5);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        z-index: 100;
+        padding: 0;
+      }
+      .modal-card {
+        background: var(--color-surface);
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        padding: var(--space-6) var(--space-5) var(--space-5);
+        width: 100%;
+        max-width: 520px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 -4px 24px rgba(0,0,0,.15);
+      }
+      @media (min-width: 640px) {
+        .modal-overlay {
+          align-items: center;
+          padding: var(--space-5);
+        }
+        .modal-card {
+          border-radius: var(--radius-lg);
+        }
+      }
+      .modal-title {
+        font-size: 1.375rem;
+        font-weight: 700;
+        margin: 0 0 var(--space-2);
+        letter-spacing: -0.01em;
+      }
+      .modal-subtitle {
+        font-size: 0.9375rem;
+        color: var(--color-muted);
+        margin: 0 0 var(--space-5);
+      }
+      .lead-form-field {
+        margin-bottom: var(--space-4);
+      }
+      .lead-form-label {
+        display: block;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--color-ink);
+        margin: 0 0 var(--space-2);
+      }
+      .lead-form-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        font-family: inherit;
+        color: var(--color-ink);
+        background: var(--color-neutral);
+        outline: 0;
+        transition: border-color var(--duration-fast) var(--ease-out),
+                    box-shadow var(--duration-fast) var(--ease-out);
+      }
+      .lead-form-input:focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 4px var(--color-primary-soft);
+      }
+      .lead-form-input.is-error {
+        border-color: var(--color-danger);
+      }
+      .lead-form-error {
+        font-size: 0.75rem;
+        color: var(--color-danger);
+        margin: var(--space-1) 0 0;
+        min-height: 1em;
+      }
+      .lead-submit {
+        display: block;
+        width: 100%;
+        padding: 16px 22px;
+        margin-top: var(--space-3);
+        background: var(--color-primary);
+        color: var(--color-neutral);
+        border: 0;
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: var(--shadow-cta);
+        transition: background var(--duration-fast) var(--ease-out);
+      }
+      .lead-submit:hover:not(:disabled) { background: var(--color-primary-hover); }
+      .lead-submit:disabled {
+        background: var(--color-track);
+        color: #a8a29e;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      .modal-close {
+        position: absolute;
+        top: var(--space-3);
+        right: var(--space-3);
+        background: transparent;
+        border: 0;
+        font-size: 1.5rem;
+        color: var(--color-muted);
+        cursor: pointer;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-close:hover { background: var(--color-subtle); }
+      .modal-trust {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        margin-top: var(--space-4);
+        padding-top: var(--space-4);
+        border-top: 1px solid var(--color-border);
+      }
+      .modal-trust-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.6875rem;
+        color: var(--color-muted);
+      }
+
+      /* ============================================================
+         12. FINAL RESULT SCREEN
+         ============================================================ */
+      .final-result {
+        padding: var(--space-6) var(--space-5);
+        max-width: 520px;
+        margin: 0 auto;
+        text-align: center;
+      }
+      .final-checkmark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--color-success-soft);
+        color: var(--color-success);
+        font-size: 2rem;
+        margin-bottom: var(--space-4);
+      }
+      .final-greeting {
+        font-size: 1.125rem;
+        color: var(--color-muted);
+        margin: 0 0 var(--space-2);
+      }
+      .final-greeting strong { color: var(--color-ink); font-weight: 600; }
+      .final-label {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--color-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin: var(--space-5) 0 var(--space-3);
+      }
+      .final-amount {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--color-ink);
+        letter-spacing: -0.02em;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+        margin: 0 0 var(--space-5);
+      }
+      .final-details {
+        background: var(--color-surface);
+        border-radius: var(--radius-md);
+        padding: var(--space-4) var(--space-5);
+        box-shadow: var(--shadow-card);
+        margin: 0 0 var(--space-5);
+        text-align: left;
+      }
+      .final-details dt {
+        font-size: 0.8125rem;
+        color: var(--color-muted);
+      }
+      .final-details dd {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--color-ink);
+        margin: 0 0 var(--space-3);
+        font-variant-numeric: tabular-nums;
+      }
+      .final-details dd:last-of-type { margin-bottom: 0; }
+      .final-promise {
+        font-size: 0.9375rem;
+        color: var(--color-muted);
+        margin: 0 0 var(--space-5);
+      }
+      .final-promise strong { color: var(--color-ink); }
+
+      /* ============================================================
+         13. VUE TRANSITIONS
+         ============================================================ */
+      .asset-card-enter-active,
+      .asset-card-leave-active {
+        transition: opacity var(--duration-base) var(--ease-out),
+                    transform var(--duration-base) var(--ease-out);
+      }
+      .asset-card-enter-from {
+        opacity: 0;
+        transform: translateY(-12px);
+      }
+      .asset-card-leave-to {
+        opacity: 0;
+        transform: translateX(40px);
+      }
+      .asset-card-leave-active {
+        position: absolute;
+      }
+
+      .modal-fade-enter-active,
+      .modal-fade-leave-active {
+        transition: opacity var(--duration-base) var(--ease-out);
+      }
+      .modal-fade-enter-active .modal-card,
+      .modal-fade-leave-active .modal-card {
+        transition: transform var(--duration-base) var(--ease-out);
+      }
+      .modal-fade-enter-from,
+      .modal-fade-leave-to { opacity: 0; }
+      .modal-fade-enter-from .modal-card,
+      .modal-fade-leave-to .modal-card { transform: translateY(40px); }
+
+      .final-enter-active {
+        transition: opacity var(--duration-slow) var(--ease-out),
+                    transform var(--duration-slow) var(--ease-out);
+      }
+      .final-enter-from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      /* ============================================================
+         14. MOBILE
+         ============================================================ */
+      @media (max-width: 480px) {
+        .calc-main { padding: var(--space-4); }
+        .top-bar { padding: var(--space-3) var(--space-4) var(--space-4); }
+        .add-card { padding: var(--space-4); }
+        .top-bar-current { font-size: 1.25rem; }
+        .final-amount { font-size: 2.5rem; }
+      }
+
+      /* ============================================================
+         15. REDUCED-MOTION
+         ============================================================ */
+      @media (prefers-reduced-motion: reduce) {
+        .boerseker-complex-calc *,
+        .boerseker-complex-calc *::before,
+        .boerseker-complex-calc *::after {
+          animation-duration: 0.001ms !important;
+          transition-duration: 0.001ms !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="boerseker-complex-calc" class="boerseker-complex-calc" v-cloak>
+
+      <!-- ==================== CALCULATOR VIEW ==================== -->
+      <template v-if="!showFinalResult">
+
+        <!-- Sticky top bar with progress -->
+        <header class="top-bar" role="status" aria-live="polite">
+          <div class="top-bar-header">
+            <span class="top-bar-label">Vordering na jou doel</span>
+            <span class="top-bar-percent" :class="{ 'is-reached': goalReached }">{{ progressPctLabel }}</span>
+          </div>
+
+          <div class="progress-track" :aria-valuenow="Math.round(progressPct)" aria-valuemin="0" aria-valuemax="100" role="progressbar">
+            <div class="progress-fill" :class="{ 'is-reached': goalReached }" :style="{ width: progressFillWidth }"></div>
+          </div>
+
+          <div class="top-bar-numbers">
+            <span class="top-bar-current">{{ formatZAR(animatedMaxLoan) }}</span>
+            <span class="top-bar-goal">van {{ formatZAR(loanGoal) }}</span>
+          </div>
+
+          <p class="top-bar-message" :class="{ 'is-reached': goalReached }">{{ progressMessage }}</p>
+          <a class="top-bar-edit" href="../simple-calc/">← Wysig bedrag</a>
+        </header>
+
+        <main class="calc-main">
+
+          <!-- ADD ASSET SECTION -->
+          <section>
+            <h2 class="section-heading">Wat besit jy?</h2>
+
+            <div class="add-card">
+
+              <!-- Category chips -->
+              <div class="add-field">
+                <label class="add-field-label">Wat is dit?</label>
+                <div class="chip-group" role="radiogroup" aria-label="Bate kategorie">
+                  <button v-for="cat in CATEGORIES" :key="cat.id"
+                          type="button"
+                          class="chip"
+                          :class="{ 'is-active': draftCategory === cat.id }"
+                          :aria-pressed="draftCategory === cat.id"
+                          @click="draftCategory = cat.id">
+                    <span class="chip-icon" aria-hidden="true">{{ cat.icon }}</span>
+                    <span>{{ cat.label }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Market value -->
+              <div class="add-field">
+                <label class="add-field-label" for="draft-value">Hoeveel is dit werd?</label>
+                <div class="add-input-wrapper">
+                  <span class="add-input-prefix" aria-hidden="true">R</span>
+                  <input
+                    id="draft-value"
+                    class="add-input"
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="off"
+                    spellcheck="false"
+                    placeholder="1 200 000"
+                    :value="draftValueDisplay"
+                    @input="handleValueInput"
+                  >
+                </div>
+              </div>
+
+              <!-- Age chips -->
+              <div class="add-field">
+                <label class="add-field-label">Hoe oud is dit?</label>
+                <div class="chip-group" role="radiogroup" aria-label="Ouderdom">
+                  <button v-for="age in AGE_BRACKETS" :key="age.id"
+                          type="button"
+                          class="chip"
+                          :class="{ 'is-active': draftAge === age.id }"
+                          :aria-pressed="draftAge === age.id"
+                          @click="draftAge = age.id">
+                    {{ age.label }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Condition chips -->
+              <div class="add-field">
+                <label class="add-field-label">Hoe lyk dit?</label>
+                <div class="chip-group" role="radiogroup" aria-label="Toestand">
+                  <button v-for="cond in CONDITIONS" :key="cond.id"
+                          type="button"
+                          class="chip"
+                          :class="{ 'is-active': draftCondition === cond.id }"
+                          :aria-pressed="draftCondition === cond.id"
+                          @click="draftCondition = cond.id">
+                    {{ cond.label }}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="voeg-by"
+                :class="{ 'is-flash': addFlash }"
+                :disabled="!draftIsValid"
+                @click="addAsset"
+              >{{ draftIsValid ? '✓ Voeg by jou bates' : 'Vul die 4 velde in' }}</button>
+            </div>
+          </section>
+
+          <!-- ASSET LIST -->
+          <section class="list-section">
+            <h2 class="section-heading">Jou bates ({{ assets.length }})</h2>
+
+            <div v-if="assets.length === 0" class="empty-state">
+              <span class="empty-state-icon" aria-hidden="true">🚜</span>
+              Voeg jou eerste bate hierbo by om te begin.
+            </div>
+
+            <transition-group v-else name="asset-card" tag="ul" class="asset-list">
+              <li v-for="asset in assets" :key="asset.id" class="asset-card">
+                <span class="asset-icon" aria-hidden="true">{{ getCategory(asset.category_id).icon }}</span>
+                <div class="asset-body">
+                  <div class="asset-title">
+                    {{ getCategory(asset.category_id).label }}
+                    <span class="asset-value">{{ formatZAR(asset.market_value) }}</span>
+                  </div>
+                  <div class="asset-meta">
+                    {{ getAge(asset.age_id).label }} · {{ getCondition(asset.condition_id).label }}
+                    · dra by ≈ <strong>{{ formatZAR(getAssetContribution(asset)) }}</strong>
+                  </div>
+                </div>
+                <button type="button" class="asset-delete" @click="removeAsset(asset.id)" :aria-label="'Verwyder ' + getCategory(asset.category_id).label">
+                  ✕
+                </button>
+              </li>
+            </transition-group>
+          </section>
+
+          <!-- ADVANCED -->
+          <details class="advanced">
+            <summary class="advanced-summary">
+              <span>Gevorderd · krediet, termyn, koers</span>
+            </summary>
+            <div class="advanced-body">
+
+              <div class="advanced-field">
+                <label class="advanced-field-label">Krediet rekord</label>
+                <div class="chip-group">
+                  <button v-for="cr in CREDIT_OPTIONS" :key="cr.id"
+                          type="button"
+                          class="chip"
+                          :class="{ 'is-active': creditRecord === cr.id }"
+                          :aria-pressed="creditRecord === cr.id"
+                          @click="creditRecord = cr.id">
+                    {{ cr.label }}
+                  </button>
+                </div>
+                <p class="advanced-field-help">Beïnvloed die LTV (30%–40%)</p>
+              </div>
+
+              <div class="advanced-field">
+                <label class="advanced-field-label">Termyn (maande)</label>
+                <div class="chip-group">
+                  <button v-for="term in TERM_OPTIONS" :key="term"
+                          type="button"
+                          class="chip"
+                          :class="{ 'is-active': loanTermMonths === term }"
+                          :aria-pressed="loanTermMonths === term"
+                          @click="loanTermMonths = term">
+                    {{ term }} mnd
+                  </button>
+                </div>
+              </div>
+
+              <div class="advanced-field">
+                <label class="advanced-field-label" for="advanced-rate">Jaarlikse rente koers</label>
+                <div class="add-input-wrapper">
+                  <input
+                    id="advanced-rate"
+                    class="add-input"
+                    type="number"
+                    inputmode="decimal"
+                    step="0.5"
+                    min="0"
+                    max="40"
+                    :value="annualInterestRatePct"
+                    @input="handleRateInput"
+                  >
+                  <span class="add-input-prefix" aria-hidden="true">%</span>
+                </div>
+              </div>
+
+            </div>
+          </details>
+
+          <!-- GATED CTA -->
+          <button
+            type="button"
+            class="cta-bottom"
+            :class="{ 'is-reached': goalReached && assets.length > 0 }"
+            :disabled="assets.length === 0"
+            @click="openLeadForm"
+          >{{ ctaLabel }}</button>
+
+        </main>
+      </template>
+
+      <!-- ==================== FINAL RESULT VIEW ==================== -->
+      <transition name="final" appear>
+        <section v-if="showFinalResult" class="final-result">
+          <div class="final-checkmark" aria-hidden="true">✓</div>
+          <p class="final-greeting">Dankie, <strong>{{ leadName }}</strong></p>
+
+          <p class="final-label">Jy kwalifiseer vir tot</p>
+          <p class="final-amount">{{ formatZAR(finalResult.max_loan) }}</p>
+
+          <dl class="final-details">
+            <dt>Maandelikse paaiement</dt>
+            <dd>{{ formatZAR(finalResult.monthly_payment) }}</dd>
+            <dt>Termyn</dt>
+            <dd>{{ loanTermMonths }} maande</dd>
+            <dt>Totale terugbetaling</dt>
+            <dd>{{ formatZAR(finalResult.total_repayment) }}</dd>
+            <dt>Totale finansieringskoste</dt>
+            <dd>{{ formatZAR(finalResult.total_finance_cost) }}</dd>
+          </dl>
+
+          <p class="final-promise">
+            <strong>Johan</strong> kontak jou binne <strong>2 ure</strong> om die volgende stap te bespreek.
+          </p>
+        </section>
+      </transition>
+
+      <!-- ==================== LEAD FORM MODAL ==================== -->
+      <transition name="modal-fade">
+        <div v-if="leadFormOpen" class="modal-overlay" @click.self="closeLeadForm">
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="lead-modal-title">
+            <button type="button" class="modal-close" @click="closeLeadForm" aria-label="Maak toe">×</button>
+
+            <h2 id="lead-modal-title" class="modal-title">Net 'n laaste ding</h2>
+            <p class="modal-subtitle">Sodat Johan jou kan terugkontak met jou werklike syfers.</p>
+
+            <form @submit.prevent="submitLead" novalidate>
+              <div class="lead-form-field">
+                <label class="lead-form-label" for="lead-name">Volle naam</label>
+                <input
+                  id="lead-name"
+                  class="lead-form-input"
+                  :class="{ 'is-error': leadErrors.name }"
+                  type="text"
+                  autocomplete="name"
+                  v-model="leadName"
+                  @blur="validateLeadField('name')"
+                >
+                <p class="lead-form-error">{{ leadErrors.name || '' }}</p>
+              </div>
+
+              <div class="lead-form-field">
+                <label class="lead-form-label" for="lead-phone">Selfoon</label>
+                <input
+                  id="lead-phone"
+                  class="lead-form-input"
+                  :class="{ 'is-error': leadErrors.phone }"
+                  type="tel"
+                  inputmode="tel"
+                  autocomplete="tel"
+                  placeholder="082 123 4567"
+                  v-model="leadPhone"
+                  @blur="validateLeadField('phone')"
+                >
+                <p class="lead-form-error">{{ leadErrors.phone || '' }}</p>
+              </div>
+
+              <div class="lead-form-field">
+                <label class="lead-form-label" for="lead-email">E-pos</label>
+                <input
+                  id="lead-email"
+                  class="lead-form-input"
+                  :class="{ 'is-error': leadErrors.email }"
+                  type="email"
+                  inputmode="email"
+                  autocomplete="email"
+                  placeholder="jy@plaas.co.za"
+                  v-model="leadEmail"
+                  @blur="validateLeadField('email')"
+                >
+                <p class="lead-form-error">{{ leadErrors.email || '' }}</p>
+              </div>
+
+              <button
+                type="submit"
+                class="lead-submit"
+                :disabled="!leadFormValid || leadSubmitting"
+              >{{ leadSubmitting ? 'Stuur...' : 'Wys my my lening →' }}</button>
+
+              <div class="modal-trust">
+                <span class="modal-trust-chip">🔒 Veilig en POPIA voldoende</span>
+                <span class="modal-trust-chip">⏱ Antwoord binne 2 uur</span>
+              </div>
+            </form>
+          </div>
+        </div>
+      </transition>
+
+    </div>
+
+    <script>
+      // ============================================================
+      // INLINE CALCULATION ENGINE
+      // ⚠️ Synced from Step 1/engine.js — keep in sync if Annexure 1 changes
+      // ============================================================
+      const FSF_TABLE = {
+        tractor: 0.85,
+        attachments_implements: 0.85,
+        sprayer: 0.80,
+        planter: 0.78,
+        baler_forage: 0.78,
+        combine: 0.70,
+        other_machinery: 0.68,
+        irrigation: 0.60,
+      };
+      const AGE_FACTOR_TABLE = [
+        { min: 0, max: 3,  factor: 1.00 },
+        { min: 4, max: 6,  factor: 0.90 },
+        { min: 7, max: 10, factor: 0.80 },
+        { min: 11, max: 99, factor: 0.65 },
+      ];
+      const CONDITION_FACTOR_TABLE = {
+        excellent: 1.00,
+        good: 0.90,
+        fair: 0.80,
+        poor: 0.65,
+      };
+      const LTV_TABLE = {
+        good: 0.40,
+        medium: 0.35,
+        weak: 0.30,
+      };
+
+      function lookupAgeFactor(years) {
+        for (const row of AGE_FACTOR_TABLE) {
+          if (years >= row.min && years <= row.max) return row.factor;
+        }
+        return 0.65;
+      }
+
+      function calcCollateral(asset) {
+        const fsf = FSF_TABLE[asset.category_id];
+        const age = AGE_BRACKETS.find(b => b.id === asset.age_id);
+        const af  = age ? lookupAgeFactor(age.years) : 0;
+        const cf  = CONDITION_FACTOR_TABLE[asset.condition_id];
+        if (!fsf || !cf || !age) return 0;
+        return asset.market_value * fsf * af * cf;
+      }
+
+      function calcAggregate(assets, app) {
+        const total_collateral = assets.reduce((s, a) => s + calcCollateral(a), 0);
+        const ltv = LTV_TABLE[app.credit_record] ?? 0.40;
+        const max_loan = total_collateral * ltv;
+
+        const n = app.loan_term_months;
+        const monthly_rate = app.annual_interest_rate / 12;
+        let monthly_payment;
+        if (app.annual_interest_rate === 0) {
+          monthly_payment = n > 0 ? max_loan / n : 0;
+        } else {
+          monthly_payment = max_loan * (monthly_rate * Math.pow(1 + monthly_rate, n)) / (Math.pow(1 + monthly_rate, n) - 1);
+        }
+        const total_repayment = monthly_payment * n;
+        const total_finance_cost = total_repayment - max_loan;
+
+        return {
+          total_collateral: Math.round(total_collateral),
+          max_loan: Math.round(max_loan),
+          monthly_payment: Math.round(monthly_payment),
+          total_repayment: Math.round(total_repayment),
+          total_finance_cost: Math.round(total_finance_cost),
+        };
+      }
+
+      // ============================================================
+      // CONSTANTS — labels for chips (Afrikaans, Boerseker voice)
+      // ============================================================
+      const CATEGORIES = [
+        { id: 'tractor',                label: 'Trekker',     icon: '🚜' },
+        { id: 'attachments_implements', label: 'Implements',  icon: '🔧' },
+        { id: 'sprayer',                label: 'Sproei',      icon: '💦' },
+        { id: 'planter',                label: 'Planter',     icon: '🌱' },
+        { id: 'baler_forage',           label: 'Baler',       icon: '🌾' },
+        { id: 'combine',                label: 'Stroper',     icon: '⚙️' },
+        { id: 'other_machinery',        label: 'Ander',       icon: '🛠️' },
+        { id: 'irrigation',             label: 'Besproeiing', icon: '💧' },
+      ];
+
+      const AGE_BRACKETS = [
+        { id: 'a1', label: '0–3 jr',  years: 2  },
+        { id: 'a2', label: '4–6 jr',  years: 5  },
+        { id: 'a3', label: '7–10 jr', years: 8  },
+        { id: 'a4', label: '11+ jr',  years: 15 },
+      ];
+
+      const CONDITIONS = [
+        { id: 'excellent', label: 'Top'  },
+        { id: 'good',      label: 'Goed' },
+        { id: 'fair',      label: 'OK'   },
+        { id: 'poor',      label: 'Sleg' },
+      ];
+
+      const CREDIT_OPTIONS = [
+        { id: 'good',   label: 'Goed'  },
+        { id: 'medium', label: 'Gemiddeld' },
+        { id: 'weak',   label: 'Swak'  },
+      ];
+
+      const TERM_OPTIONS = [24, 36, 48, 60];
+
+      // CRM endpoint placeholder — swap with real Zoho webhook later
+      const CRM_ENDPOINT = '/api/leads/complex-calc';
+
+      // ============================================================
+      // VUE APP
+      // ============================================================
+      const { createApp, ref, computed, watch, onMounted, nextTick } = Vue;
+
+      createApp({
+        setup() {
+          // ----- Constants exposed to template -----
+          // (template can access these via the returned object)
+
+          // ----- State: loan goal -----
+          const loanGoal = ref(500000);
+
+          // ----- State: draft asset (current entry) -----
+          const draftCategory  = ref(null);
+          const draftValue     = ref(null);
+          const draftValueDisplay = ref('');
+          const draftAge       = ref(null);
+          const draftCondition = ref(null);
+
+          // ----- State: assets list -----
+          const assets = ref([]);
+          let nextAssetId = 1;
+
+          // ----- State: application defaults (advanced) -----
+          const creditRecord       = ref('good');
+          const loanTermMonths     = ref(60);
+          const annualInterestRate = ref(0.18);
+
+          // ----- State: lead form -----
+          const leadFormOpen   = ref(false);
+          const leadName       = ref('');
+          const leadPhone      = ref('');
+          const leadEmail      = ref('');
+          const leadErrors     = ref({});
+          const leadSubmitting = ref(false);
+
+          // ----- State: final result -----
+          const showFinalResult = ref(false);
+          const finalResult     = ref(null);
+
+          // ----- State: animation -----
+          const addFlash       = ref(false);
+          const animatedMaxLoan = ref(0);
+
+          // ----- ZAR formatter -----
+          const zarFormat = new Intl.NumberFormat('af-ZA', {
+            style: 'currency',
+            currency: 'ZAR',
+            maximumFractionDigits: 0,
+          });
+          function formatZAR(n) { return zarFormat.format(Math.round(n || 0)); }
+
+          // ----- Lookup helpers -----
+          function getCategory(id)  { return CATEGORIES.find(c => c.id === id) || {}; }
+          function getAge(id)       { return AGE_BRACKETS.find(a => a.id === id) || {}; }
+          function getCondition(id) { return CONDITIONS.find(c => c.id === id) || {}; }
+
+          // ----- Per-asset contribution to max loan -----
+          function getAssetContribution(asset) {
+            const collateral = calcCollateral(asset);
+            const ltv = LTV_TABLE[creditRecord.value] ?? 0.40;
+            return collateral * ltv;
+          }
+
+          // ----- Computeds -----
+          const draftIsValid = computed(() =>
+            draftCategory.value !== null
+            && typeof draftValue.value === 'number'
+            && draftValue.value >= 1000
+            && draftAge.value !== null
+            && draftCondition.value !== null
+          );
+
+          const aggregate = computed(() => calcAggregate(assets.value, {
+            credit_record: creditRecord.value,
+            loan_term_months: loanTermMonths.value,
+            annual_interest_rate: annualInterestRate.value,
+          }));
+
+          const totalMaxLoan = computed(() => aggregate.value.max_loan);
+
+          const progressPct = computed(() => {
+            if (loanGoal.value === 0) return 0;
+            return (totalMaxLoan.value / loanGoal.value) * 100;
+          });
+
+          const progressFillWidth = computed(() => {
+            return Math.min(100, Math.max(0, progressPct.value)) + '%';
+          });
+
+          const progressPctLabel = computed(() => Math.round(progressPct.value) + '%');
+
+          const goalReached = computed(() => totalMaxLoan.value >= loanGoal.value && assets.value.length > 0);
+
+          const progressMessage = computed(() => {
+            if (assets.value.length === 0) return 'Voeg jou bates by om die balk te laat groei';
+            if (goalReached.value) return '✓ Jy het jou doel bereik. Kom ons bevestig.';
+            const togo = loanGoal.value - totalMaxLoan.value;
+            return 'Nog ' + formatZAR(togo) + ' om jou doel te haal';
+          });
+
+          const ctaLabel = computed(() => {
+            if (assets.value.length === 0) return 'Voeg minstens een bate by';
+            if (goalReached.value) return 'Ek is reg — wys my my lening →';
+            return 'Wys my my lening →';
+          });
+
+          const annualInterestRatePct = computed(() =>
+            (annualInterestRate.value * 100).toFixed(1).replace(/\.0$/, '')
+          );
+
+          const leadFormValid = computed(() =>
+            isValidName(leadName.value)
+            && isValidPhone(leadPhone.value)
+            && isValidEmail(leadEmail.value)
+          );
+
+          // ----- Validators -----
+          function isValidName(v)  { return typeof v === 'string' && v.trim().length >= 2; }
+          function isValidPhone(v) {
+            if (!v) return false;
+            const cleaned = v.replace(/[\s\-()]/g, '');
+            return /^(0[6-8]\d{8}|\+27[6-8]\d{8})$/.test(cleaned);
+          }
+          function isValidEmail(v) {
+            return typeof v === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+          }
+          function validateLeadField(field) {
+            const errs = { ...leadErrors.value };
+            if (field === 'name')  errs.name  = isValidName(leadName.value)  ? '' : 'Voer asseblief jou volle naam in';
+            if (field === 'phone') errs.phone = isValidPhone(leadPhone.value) ? '' : 'Gebruik \'n geldige SA selfoonnommer';
+            if (field === 'email') errs.email = isValidEmail(leadEmail.value) ? '' : 'Voer \'n geldige e-pos adres in';
+            leadErrors.value = errs;
+          }
+
+          // ----- Input handlers -----
+          function handleValueInput(e) {
+            const el = e.target;
+            const oldCursor = el.selectionStart ?? el.value.length;
+            const digitsBeforeCursor = el.value.substring(0, oldCursor).replace(/\D/g, '').length;
+
+            const rawDigits = el.value.replace(/\D/g, '');
+            if (rawDigits === '') {
+              draftValue.value = null;
+              draftValueDisplay.value = '';
+              return;
+            }
+            const numeric = parseInt(rawDigits, 10);
+            draftValue.value = numeric;
+            const formatted = numeric.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+            draftValueDisplay.value = formatted;
+
+            requestAnimationFrame(() => {
+              if (document.activeElement !== el) return;
+              let newCursor = 0, count = 0;
+              for (let i = 0; i < formatted.length; i++) {
+                if (count >= digitsBeforeCursor) break;
+                if (/\d/.test(formatted[i])) count++;
+                newCursor = i + 1;
+              }
+              try { el.setSelectionRange(newCursor, newCursor); } catch (_) {}
+            });
+          }
+
+          function handleRateInput(e) {
+            const v = parseFloat(e.target.value);
+            if (!isNaN(v) && v >= 0 && v <= 40) {
+              annualInterestRate.value = v / 100;
+            }
+          }
+
+          // ----- Add / remove asset -----
+          function addAsset() {
+            if (!draftIsValid.value) return;
+
+            assets.value.push({
+              id: nextAssetId++,
+              category_id: draftCategory.value,
+              market_value: draftValue.value,
+              age_id: draftAge.value,
+              condition_id: draftCondition.value,
+            });
+
+            // Reset draft
+            draftCategory.value = null;
+            draftValue.value = null;
+            draftValueDisplay.value = '';
+            draftAge.value = null;
+            draftCondition.value = null;
+
+            // Flash feedback
+            addFlash.value = true;
+            setTimeout(() => { addFlash.value = false; }, 600);
+          }
+
+          function removeAsset(id) {
+            assets.value = assets.value.filter(a => a.id !== id);
+          }
+
+          // ----- Lead form -----
+          function openLeadForm() {
+            if (assets.value.length === 0) return;
+            leadFormOpen.value = true;
+            nextTick(() => {
+              const el = document.getElementById('lead-name');
+              if (el) el.focus();
+            });
+          }
+
+          function closeLeadForm() {
+            leadFormOpen.value = false;
+          }
+
+          async function submitLead() {
+            // Final validation
+            validateLeadField('name');
+            validateLeadField('phone');
+            validateLeadField('email');
+            if (!leadFormValid.value) return;
+
+            leadSubmitting.value = true;
+
+            // Build the payload
+            const payload = {
+              lead: {
+                name: leadName.value.trim(),
+                phone: leadPhone.value.trim(),
+                email: leadEmail.value.trim(),
+              },
+              loan_goal: loanGoal.value,
+              assets: assets.value.map(a => ({
+                category: a.category_id,
+                market_value: a.market_value,
+                age_years: getAge(a.age_id).years,
+                condition: a.condition_id,
+                collateral_value: Math.round(calcCollateral(a)),
+              })),
+              application: {
+                credit_record: creditRecord.value,
+                loan_term_months: loanTermMonths.value,
+                annual_interest_rate: annualInterestRate.value,
+              },
+              result: aggregate.value,
+              source: 'complex-calc',
+              timestamp: new Date().toISOString(),
+            };
+
+            // Optimistic UI: capture result and reveal immediately
+            finalResult.value = aggregate.value;
+
+            // Fire-and-forget POST to CRM (placeholder endpoint)
+            try {
+              await fetch(CRM_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+              });
+            } catch (err) {
+              // Don't block the user — log it for the dev to follow up
+              console.warn('[Boerseker] CRM POST failed:', err);
+            } finally {
+              leadSubmitting.value = false;
+              leadFormOpen.value = false;
+              showFinalResult.value = true;
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }
+
+          // ----- Animated counter on top bar -----
+          let counterRaf = null;
+          watch(totalMaxLoan, (newVal, oldVal) => {
+            if (counterRaf) cancelAnimationFrame(counterRaf);
+            const start = animatedMaxLoan.value;
+            const delta = newVal - start;
+            const duration = 500;
+            const startTime = performance.now();
+            function tick(now) {
+              const elapsed = now - startTime;
+              const t = Math.min(1, elapsed / duration);
+              const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+              animatedMaxLoan.value = Math.round(start + delta * eased);
+              if (t < 1) {
+                counterRaf = requestAnimationFrame(tick);
+              } else {
+                animatedMaxLoan.value = newVal;
+                counterRaf = null;
+              }
+            }
+            counterRaf = requestAnimationFrame(tick);
+          });
+
+          // ----- Read loan goal from URL on mount -----
+          onMounted(() => {
+            const params = new URLSearchParams(window.location.search);
+            const loanParam = params.get('loan');
+            if (loanParam) {
+              const parsed = parseInt(loanParam, 10);
+              if (!isNaN(parsed) && parsed >= 10000 && parsed <= 100000000) {
+                loanGoal.value = parsed;
+              }
+            }
+
+            // Escape closes lead modal
+            document.addEventListener('keydown', (e) => {
+              if (e.key === 'Escape' && leadFormOpen.value) closeLeadForm();
+            });
+          });
+
+          return {
+            // Constants
+            CATEGORIES, AGE_BRACKETS, CONDITIONS, CREDIT_OPTIONS, TERM_OPTIONS,
+
+            // State
+            loanGoal,
+            draftCategory, draftValue, draftValueDisplay, draftAge, draftCondition,
+            assets,
+            creditRecord, loanTermMonths, annualInterestRate, annualInterestRatePct,
+            leadFormOpen, leadName, leadPhone, leadEmail, leadErrors, leadSubmitting,
+            showFinalResult, finalResult,
+            addFlash, animatedMaxLoan,
+
+            // Computeds
+            draftIsValid,
+            totalMaxLoan,
+            progressPct, progressPctLabel, progressFillWidth,
+            goalReached, progressMessage, ctaLabel,
+            leadFormValid,
+
+            // Methods
+            formatZAR,
+            getCategory, getAge, getCondition, getAssetContribution,
+            handleValueInput, handleRateInput,
+            addAsset, removeAsset,
+            openLeadForm, closeLeadForm, submitLead,
+            validateLeadField,
+          };
+        }
+      }).mount('#boerseker-complex-calc');
+    </script>
+  </body>
+</html>

@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="af-ZA">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <meta name="description" content="Herfinansiering skatting — sien watter bates jy nodig het om te kwalifiseer.">
+    <title>Herfinansiering Skatting — Boerseker</title>
+
+    <!-- Vue 3 production CDN (single dependency, ~35KB gzipped) -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+    <!-- Inline <style> block with CSS custom properties (scoped to .boerseker-calc) -->
+    <style>
+
+      /* ---------- 1. Design tokens (CSS custom properties) ---------- */
+      :root {
+        /* Brand */
+        --color-primary: #fe8500;
+        --color-primary-soft: #fff4e8;
+        --color-primary-hover: #e57600;
+        --color-neutral: #ffffff;
+        --color-black: #000000;
+
+        /* Surfaces & text */
+        --color-bg: #fafaf9;
+        --color-surface: #ffffff;
+        --color-ink: #1c1c1c;
+        --color-muted: #6b6b6b;
+        --color-subtle: #f5f5f4;
+        --color-border: #e7e5e4;
+
+        /* Spacing scale */
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-5: 24px;
+        --space-6: 32px;
+
+        /* Radii */
+        --radius-sm: 8px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+        --radius-pill: 999px;
+
+        /* Typography */
+        --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+        /* Shadows */
+        --shadow-card: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+        --shadow-cta: 0 2px 4px rgba(254,133,0,.12), 0 8px 20px rgba(254,133,0,.18);
+
+        /* Motion */
+        --duration-fast: 180ms;
+        --duration-base: 240ms;
+        --duration-slow: 380ms;
+        --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      /* ---------- 2. Standalone-page baseline (only when not embedded) ---------- */
+      body {
+        margin: 0;
+        background: var(--color-bg);
+        font-family: var(--font-stack);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-5);
+      }
+
+      /* ---------- 3. Scoped reset (only inside the widget root) ---------- */
+      .boerseker-calc,
+      .boerseker-calc *,
+      .boerseker-calc *::before,
+      .boerseker-calc *::after {
+        box-sizing: border-box;
+      }
+
+      /* ---------- 4. v-cloak guard (prevents unstyled flash) ---------- */
+      [v-cloak] { display: none !important; }
+
+      /* ---------- 5. Widget root ---------- */
+      .boerseker-calc {
+        font-family: var(--font-stack);
+        color: var(--color-ink);
+        line-height: 1.5;
+        width: 100%;
+        max-width: 520px;
+      }
+
+      /* ---------- 6. Hero heading ---------- */
+      .calc-heading {
+        font-size: 1.625rem;
+        font-weight: 700;
+        letter-spacing: -0.015em;
+        margin: 0 0 var(--space-2);
+        color: var(--color-ink);
+      }
+      .calc-subheading {
+        font-size: 1rem;
+        color: var(--color-muted);
+        margin: 0 0 var(--space-5);
+      }
+
+      /* ---------- 7. Calculator card ---------- */
+      .calc-card {
+        background: var(--color-surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-card);
+        padding: var(--space-5);
+      }
+
+      .calc-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--color-ink);
+        margin: 0 0 var(--space-2);
+      }
+
+      .calc-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius-md);
+        padding: var(--space-3) var(--space-4);
+        background: var(--color-neutral);
+        transition: border-color var(--duration-fast) var(--ease-out),
+                    box-shadow var(--duration-fast) var(--ease-out);
+      }
+      .calc-input-wrapper:focus-within {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 4px var(--color-primary-soft);
+      }
+
+      .calc-input-prefix {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--color-muted);
+        line-height: 1;
+      }
+
+      .calc-input {
+        flex: 1;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--color-ink);
+        font-family: inherit;
+        padding: 0;
+        letter-spacing: 0.02em;
+      }
+      .calc-input::placeholder {
+        color: #c4c0bb;
+        font-weight: 500;
+      }
+
+      .calc-helper {
+        font-size: 0.8125rem;
+        color: var(--color-muted);
+        margin: var(--space-2) 0 0;
+        min-height: 1.2em;
+      }
+      .calc-helper.is-error {
+        color: #c2410c;
+      }
+
+      /* ---------- 8. Result block ---------- */
+      .calc-result {
+        margin-top: var(--space-5);
+        padding-top: var(--space-5);
+        border-top: 1px solid var(--color-border);
+      }
+      .calc-result-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--color-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin: 0 0 var(--space-2);
+      }
+      .calc-result-range {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--color-ink);
+        letter-spacing: -0.015em;
+        margin: 0 0 var(--space-3);
+        line-height: 1.15;
+      }
+      .calc-result-sentence {
+        font-size: 0.9375rem;
+        color: var(--color-muted);
+        margin: 0;
+      }
+      .calc-result-sentence strong {
+        color: var(--color-ink);
+        font-weight: 600;
+      }
+
+      /* ---------- 9. Advisor section ---------- */
+      .advisor {
+        margin-top: var(--space-6);
+      }
+      .advisor-header {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        margin-bottom: var(--space-3);
+      }
+      .advisor-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+        color: var(--color-neutral);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9375rem;
+        flex-shrink: 0;
+        letter-spacing: 0.02em;
+      }
+      .advisor-meta {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.25;
+      }
+      .advisor-name {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--color-ink);
+      }
+      .advisor-role {
+        font-size: 0.8125rem;
+        color: var(--color-muted);
+      }
+
+      /* ---------- 10. Speech bubble + typing dots ---------- */
+      .speech-bubble-wrapper {
+        margin-left: 56px;
+        min-height: 44px;
+        position: relative;
+      }
+      .typing-dots {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 12px 16px;
+        background: var(--color-primary-soft);
+        border-radius: var(--radius-md);
+        border-top-left-radius: 4px;
+      }
+      .typing-dots span {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--color-primary);
+        animation: typing-bounce 1.2s infinite ease-in-out;
+      }
+      .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+      .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+      @keyframes typing-bounce {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+        30%           { transform: translateY(-5px); opacity: 1; }
+      }
+
+      .speech-bubble {
+        display: inline-block;
+        padding: 12px 16px;
+        background: var(--color-primary-soft);
+        color: var(--color-ink);
+        border-radius: var(--radius-md);
+        border-top-left-radius: 4px;
+        font-size: 0.9375rem;
+        line-height: 1.45;
+        max-width: 100%;
+      }
+
+      /* ---------- 11. Soft-choice CTA ---------- */
+      .cta-soft-choice {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        flex-wrap: wrap;
+        margin-top: var(--space-4);
+        margin-left: 56px;
+      }
+      .cta-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        background: var(--color-primary);
+        color: var(--color-neutral);
+        font-weight: 600;
+        font-size: 0.9375rem;
+        padding: 12px 22px;
+        border-radius: var(--radius-pill);
+        text-decoration: none;
+        border: 0;
+        cursor: pointer;
+        font-family: inherit;
+        box-shadow: var(--shadow-cta);
+        transition: transform var(--duration-fast) var(--ease-out),
+                    background var(--duration-fast) var(--ease-out),
+                    box-shadow var(--duration-fast) var(--ease-out);
+      }
+      .cta-primary:hover {
+        transform: translateY(-1px);
+        background: var(--color-primary-hover);
+      }
+      .cta-primary:active {
+        transform: translateY(0);
+      }
+      .cta-primary:focus-visible {
+        outline: 3px solid var(--color-primary-soft);
+        outline-offset: 2px;
+      }
+      .cta-primary-arrow {
+        display: inline-block;
+        transition: transform var(--duration-fast) var(--ease-out);
+      }
+      .cta-primary:hover .cta-primary-arrow {
+        transform: translateX(3px);
+      }
+      .cta-ghost {
+        background: none;
+        border: 0;
+        color: var(--color-muted);
+        font-size: 0.875rem;
+        font-family: inherit;
+        cursor: pointer;
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-sm);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        text-decoration-color: transparent;
+        transition: color var(--duration-fast) var(--ease-out),
+                    text-decoration-color var(--duration-fast) var(--ease-out);
+      }
+      .cta-ghost:hover {
+        color: var(--color-ink);
+        text-decoration-color: var(--color-ink);
+      }
+
+      /* ---------- 12. Trust chips ---------- */
+      .trust-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        margin-top: var(--space-4);
+        margin-left: 56px;
+      }
+      .trust-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.75rem;
+        color: var(--color-muted);
+        background: var(--color-subtle);
+        padding: 6px 10px;
+        border-radius: var(--radius-pill);
+        white-space: nowrap;
+      }
+      .trust-chip-icon {
+        font-size: 0.8125rem;
+        line-height: 1;
+      }
+
+      /* ---------- 13. Vue Transition classes ---------- */
+      /* fade-up: result block + bubble + cta + trust chips */
+      .fade-up-enter-active {
+        transition: opacity var(--duration-base) var(--ease-out),
+                    transform var(--duration-base) var(--ease-out);
+      }
+      .fade-up-leave-active {
+        transition: opacity var(--duration-fast) var(--ease-out);
+      }
+      .fade-up-enter-from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      .fade-up-leave-to {
+        opacity: 0;
+      }
+
+      /* fade-up-slow: advisor wrapper */
+      .fade-up-slow-enter-active {
+        transition: opacity var(--duration-slow) var(--ease-out),
+                    transform var(--duration-slow) var(--ease-out);
+      }
+      .fade-up-slow-enter-from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+
+      /* fade-quick: dots ↔ bubble crossfade */
+      .fade-quick-enter-active,
+      .fade-quick-leave-active {
+        transition: opacity var(--duration-fast) var(--ease-out);
+      }
+      .fade-quick-enter-from,
+      .fade-quick-leave-to {
+        opacity: 0;
+      }
+
+      /* ---------- 14. Mobile adjustments ---------- */
+      @media (max-width: 520px) {
+        .calc-heading { font-size: 1.375rem; }
+        .calc-result-range { font-size: 1.5rem; }
+        .speech-bubble-wrapper,
+        .cta-soft-choice,
+        .trust-chips {
+          margin-left: 0;
+        }
+        .cta-primary {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+
+      /* ---------- 15. Reduced-motion guard ---------- */
+      @media (prefers-reduced-motion: reduce) {
+        .boerseker-calc *,
+        .boerseker-calc *::before,
+        .boerseker-calc *::after {
+          animation-duration: 0.001ms !important;
+          transition-duration: 0.001ms !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Mount root. ID is namespaced so it can't collide with the parent site. -->
+    <div id="boerseker-calc" class="boerseker-calc" v-cloak data-step2-url="#step-2">
+
+      <h1 class="calc-heading">Hoeveel het jy nodig?</h1>
+      <p class="calc-subheading">Sit jou bedrag in. Ons wys jou wat dit gaan vat om te kwalifiseer.</p>
+
+      <div class="calc-card">
+        <label class="calc-label" for="calc-amount-input">Ek het nodig...</label>
+
+        <div class="calc-input-wrapper">
+          <span class="calc-input-prefix" aria-hidden="true">R</span>
+          <input
+            id="calc-amount-input"
+            class="calc-input"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="500 000"
+            :value="displayAmount"
+            @input="handleInput"
+            aria-describedby="calc-helper"
+          >
+        </div>
+        <p class="calc-helper" id="calc-helper" :class="{ 'is-error': helperIsError }">{{ helperText }}</p>
+
+        <transition name="fade-up">
+          <div v-show="isValid" class="calc-result" aria-live="polite">
+            <p class="calc-result-label">Bates wat jy nodig het</p>
+            <p class="calc-result-range">{{ formattedLower }} – {{ formattedUpper }}</p>
+            <p class="calc-result-sentence">
+              Vir <strong>{{ formattedAmount }}</strong> se finansiering moet jou bates tipies iewers in hierdie reeks lê.
+            </p>
+          </div>
+        </transition>
+      </div>
+
+      <transition name="fade-up-slow">
+        <div v-show="showAdvisor" class="advisor">
+          <div class="advisor-header">
+            <div class="advisor-avatar" aria-hidden="true">JV</div>
+            <div class="advisor-meta">
+              <span class="advisor-name">Johan van der Merwe</span>
+              <span class="advisor-role">Senior Boerefinansierings Adviseur</span>
+            </div>
+          </div>
+
+          <div class="speech-bubble-wrapper">
+            <transition name="fade-quick" mode="out-in">
+              <div v-if="!bubbleReady" key="dots" class="typing-dots" aria-label="Adviseur tik 'n boodskap">
+                <span></span><span></span><span></span>
+              </div>
+              <div v-else key="bubble" class="speech-bubble">
+                Dis net 'n vinnige skatting. Wil jy hê ek moet kyk of jy regtig kan kwalifiseer?
+              </div>
+            </transition>
+          </div>
+
+          <transition name="fade-up">
+            <div v-show="ctaReady" class="cta-soft-choice">
+              <a class="cta-primary" :href="step2Url" @click="handlePrimaryClick">
+                Ja, kom ons kyk
+                <span class="cta-primary-arrow" aria-hidden="true">→</span>
+              </a>
+              <button class="cta-ghost" type="button" @click="handleGhostClick">
+                Ek loer net rond
+              </button>
+            </div>
+          </transition>
+
+          <transition name="fade-up">
+            <div v-show="ctaReady" class="trust-chips">
+              <span class="trust-chip"><span class="trust-chip-icon">🔒</span> Nog geen kredietkontrole</span>
+              <span class="trust-chip"><span class="trust-chip-icon">⏱</span> Regte adviseur antwoord binne 2 uur</span>
+              <span class="trust-chip"><span class="trust-chip-icon">🇿🇦</span> NCR Geregistreer</span>
+            </div>
+          </transition>
+        </div>
+      </transition>
+
+    </div>
+
+    <script>
+      const { createApp, ref, computed, watch, onMounted } = Vue;
+
+      createApp({
+        setup() {
+          // ----- State -----
+          const desiredAmount = ref(null);     // raw numeric value (rands)
+          const displayAmount = ref('');       // formatted string shown in the input
+          const showAdvisor = ref(false);      // controls advisor section visibility
+          const bubbleReady = ref(false);      // false = typing dots, true = speech bubble
+          const ctaReady = ref(false);         // controls CTA + trust chips visibility
+          const step2Url = ref('#step-2');     // overridable via data-step2-url
+
+          // Internal latch — prevents the reveal sequence from firing more than once
+          let revealStarted = false;
+
+          // ----- ZAR currency formatter (Afrikaans locale) -----
+          const zarFormat = new Intl.NumberFormat('af-ZA', {
+            style: 'currency',
+            currency: 'ZAR',
+            maximumFractionDigits: 0,
+          });
+
+          // ----- Validation bounds -----
+          const MIN_AMOUNT = 10000;        // R10k floor — sub-10k isn't a refinance
+          const MAX_AMOUNT = 100000000;    // R100m ceiling — anything bigger goes direct
+
+          // ----- Computed -----
+          const isValid = computed(() =>
+            typeof desiredAmount.value === 'number'
+            && desiredAmount.value >= MIN_AMOUNT
+            && desiredAmount.value <= MAX_AMOUNT
+          );
+
+          // Formula: assets needed = loan amount / LTV ratio
+          //   lower bound = loan / 0.40  (optimistic LTV — fewer assets)
+          //   upper bound = loan / 0.30  (conservative LTV — more assets)
+          const lowerBound = computed(() =>
+            isValid.value ? desiredAmount.value / 0.40 : 0
+          );
+          const upperBound = computed(() =>
+            isValid.value ? desiredAmount.value / 0.30 : 0
+          );
+
+          const formattedLower  = computed(() => zarFormat.format(lowerBound.value));
+          const formattedUpper  = computed(() => zarFormat.format(upperBound.value));
+          const formattedAmount = computed(() =>
+            desiredAmount.value ? zarFormat.format(desiredAmount.value) : ''
+          );
+
+          const helperIsError = computed(() =>
+            desiredAmount.value !== null
+            && (desiredAmount.value < MIN_AMOUNT || desiredAmount.value > MAX_AMOUNT)
+          );
+
+          const helperText = computed(() => {
+            if (desiredAmount.value === null) return 'Minimum R10 000';
+            if (desiredAmount.value < MIN_AMOUNT) return 'Minimum R10 000';
+            if (desiredAmount.value > MAX_AMOUNT) return 'Vir bedrae oor R100m, kontak ons direk';
+          });
+
+          // ----- Input handler (with cursor preservation) -----
+          function handleInput(e) {
+            const el = e.target;
+            const oldCursor = el.selectionStart ?? el.value.length;
+            const digitsBeforeCursor = el.value.substring(0, oldCursor).replace(/\D/g, '').length;
+
+            const rawDigits = el.value.replace(/\D/g, '');
+
+            if (rawDigits === '') {
+              desiredAmount.value = null;
+              displayAmount.value = '';
+              return;
+            }
+
+            const numeric = parseInt(rawDigits, 10);
+            desiredAmount.value = numeric;
+
+            // Insert a space every 3 digits from the right (ZA convention)
+            const formatted = numeric.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+            displayAmount.value = formatted;
+
+            // Restore cursor position relative to the digits
+            requestAnimationFrame(() => {
+              if (document.activeElement !== el) return;
+              let newCursor = 0;
+              let count = 0;
+              for (let i = 0; i < formatted.length; i++) {
+                if (count >= digitsBeforeCursor) break;
+                if (/\d/.test(formatted[i])) count++;
+                newCursor = i + 1;
+              }
+              try { el.setSelectionRange(newCursor, newCursor); } catch (_) {}
+            });
+          }
+
+          // ----- Reveal sequence (fires exactly once on first valid input) -----
+          watch(isValid, (valid) => {
+            if (!valid || revealStarted) return;
+            revealStarted = true;
+
+            // Result block animates in immediately via its own <transition>
+            // (triggered automatically when isValid flips true)
+
+            // Advisor section slides in shortly after
+            setTimeout(() => { showAdvisor.value = true;  }, 380);
+
+            // Typing dots resolve into the speech bubble
+            setTimeout(() => { bubbleReady.value = true;  }, 1180);
+
+            // Soft-choice CTA + trust chips appear
+            setTimeout(() => { ctaReady.value = true;     }, 1380);
+          });
+
+          // ----- CTA handlers -----
+          function handlePrimaryClick(e) {
+            // If step2Url is still the placeholder, prevent navigation
+            if (step2Url.value === '#step-2') {
+              e.preventDefault();
+              console.log('[Boerseker] Primary CTA clicked — Step 2 URL not yet configured');
+            }
+            // Otherwise the <a> href handles navigation natively
+          }
+
+          function handleGhostClick() {
+            // No-op for now. Future: trigger an "email me later" capture.
+            console.log('[Boerseker] Ghost CTA clicked — "I\'m just browsing"');
+          }
+
+          // ----- Read step2 URL from mount-element data attribute -----
+          onMounted(() => {
+            const root = document.getElementById('boerseker-calc');
+            const url = root?.getAttribute('data-step2-url');
+            if (url) step2Url.value = url;
+          });
+
+          return {
+            displayAmount,
+            isValid,
+            showAdvisor,
+            bubbleReady,
+            ctaReady,
+            formattedLower,
+            formattedUpper,
+            formattedAmount,
+            helperText,
+            helperIsError,
+            step2Url,
+            handleInput,
+            handlePrimaryClick,
+            handleGhostClick,
+          };
+        }
+      }).mount('#boerseker-calc');
+    </script>
+  </body>
+</html>

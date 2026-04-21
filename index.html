@@ -1435,7 +1435,7 @@
       <transition name="final" appear>
         <section v-if="showFinalResult" class="final-result">
           <div class="final-checkmark" aria-hidden="true">✓</div>
-          <p class="final-greeting">Dankie, <strong>{{ leadName }}</strong></p>
+          <p class="final-greeting">Dankie, <strong>{{ leadFirstName }}</strong></p>
 
           <p class="final-label">Jy kwalifiseer vir tot</p>
           <p class="final-amount">{{ formatZAR(finalResult.max_loan) }}</p>
@@ -1468,17 +1468,31 @@
 
             <form @submit.prevent="submitLead" novalidate>
               <div class="lead-form-field">
-                <label class="lead-form-label" for="lead-name">Volle naam</label>
+                <label class="lead-form-label" for="lead-first-name">Naam</label>
                 <input
-                  id="lead-name"
+                  id="lead-first-name"
                   class="lead-form-input"
-                  :class="{ 'is-error': leadErrors.name }"
+                  :class="{ 'is-error': leadErrors.firstName }"
                   type="text"
-                  autocomplete="name"
-                  v-model="leadName"
-                  @blur="validateLeadField('name')"
+                  autocomplete="given-name"
+                  v-model="leadFirstName"
+                  @blur="validateLeadField('firstName')"
                 >
-                <p class="lead-form-error">{{ leadErrors.name || '' }}</p>
+                <p class="lead-form-error">{{ leadErrors.firstName || '' }}</p>
+              </div>
+
+              <div class="lead-form-field">
+                <label class="lead-form-label" for="lead-last-name">Van</label>
+                <input
+                  id="lead-last-name"
+                  class="lead-form-input"
+                  :class="{ 'is-error': leadErrors.lastName }"
+                  type="text"
+                  autocomplete="family-name"
+                  v-model="leadLastName"
+                  @blur="validateLeadField('lastName')"
+                >
+                <p class="lead-form-error">{{ leadErrors.lastName || '' }}</p>
               </div>
 
               <div class="lead-form-field">
@@ -1689,7 +1703,8 @@
           const annualInterestRate = ref(0.18);
 
           const leadFormOpen   = ref(false);
-          const leadName       = ref('');
+          const leadFirstName  = ref('');
+          const leadLastName   = ref('');
           const leadPhone      = ref('');
           const leadEmail      = ref('');
           const leadErrors     = ref({});
@@ -1780,7 +1795,8 @@
           );
 
           const leadFormValid = computed(() =>
-            isValidName(leadName.value)
+            isValidName(leadFirstName.value)
+            && isValidName(leadLastName.value)
             && isValidPhone(leadPhone.value)
             && isValidEmail(leadEmail.value)
           );
@@ -1808,9 +1824,10 @@
           }
           function validateLeadField(field) {
             const errs = { ...leadErrors.value };
-            if (field === 'name')  errs.name  = isValidName(leadName.value)  ? '' : 'Voer asseblief jou volle naam in';
-            if (field === 'phone') errs.phone = isValidPhone(leadPhone.value) ? '' : 'Gebruik \'n geldige SA selfoonnommer';
-            if (field === 'email') errs.email = isValidEmail(leadEmail.value) ? '' : 'Voer \'n geldige e-pos adres in';
+            if (field === 'firstName') errs.firstName = isValidName(leadFirstName.value) ? '' : 'Voer asseblief jou naam in';
+            if (field === 'lastName')  errs.lastName  = isValidName(leadLastName.value)  ? '' : 'Voer asseblief jou van in';
+            if (field === 'phone')     errs.phone     = isValidPhone(leadPhone.value)     ? '' : 'Gebruik \'n geldige SA selfoonnommer';
+            if (field === 'email')     errs.email     = isValidEmail(leadEmail.value)     ? '' : 'Voer \'n geldige e-pos adres in';
             leadErrors.value = errs;
           }
 
@@ -1927,7 +1944,7 @@
             if (assets.value.length === 0) return;
             leadFormOpen.value = true;
             nextTick(() => {
-              const el = document.getElementById('lead-name');
+              const el = document.getElementById('lead-first-name');
               if (el) el.focus();
             });
           }
@@ -1937,7 +1954,8 @@
           }
 
           async function submitLead() {
-            validateLeadField('name');
+            validateLeadField('firstName');
+            validateLeadField('lastName');
             validateLeadField('phone');
             validateLeadField('email');
             if (!leadFormValid.value) return;
@@ -1952,11 +1970,10 @@
                 ? '+27' + rawPhone.slice(1)
                 : '+' + rawPhone;
 
-            // Split full name into first + last
-            const fullName = leadName.value.trim().replace(/\s+/g, ' ');
-            const nameParts = fullName.split(' ');
-            const firstName = nameParts[0] || '';
-            const lastName  = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+            // Compose full name from the two captured fields
+            const firstName = leadFirstName.value.trim().replace(/\s+/g, ' ');
+            const lastName  = leadLastName.value.trim().replace(/\s+/g, ' ');
+            const fullName  = (firstName + ' ' + lastName).trim();
 
             const assetsList = assets.value.map(a => ({
               category: a.category_id,
@@ -2185,7 +2202,7 @@
             draftCategory, draftValue, draftValueDisplay, draftAge, draftCondition,
             assets,
             creditRecord, loanTermMonths, annualInterestRate, annualInterestRatePct,
-            leadFormOpen, leadName, leadPhone, leadEmail, leadErrors, leadSubmitting,
+            leadFormOpen, leadFirstName, leadLastName, leadPhone, leadEmail, leadErrors, leadSubmitting,
             showFinalResult, finalResult,
             addFlash, animatedMaxLoan,
 

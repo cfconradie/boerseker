@@ -1,2 +1,9 @@
 /docs
 /claude
+
+# Secrets & local config — NEVER commit
+.env
+.env.*
+!.env.example
+.claude/
+.cursor/

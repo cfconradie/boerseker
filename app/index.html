@@ -11,20 +11,21 @@
 
     <style>
       /* ============================================================
-         1. DESIGN TOKENS (union of simple-calc + complex-calc)
+         1. css variables
          ============================================================ */
       :root {
         /* Brand */
-        --color-primary: #fe8500;
-        --color-primary-soft: #fff4e8;
-        --color-primary-hover: #e57600;
+        --color-primary: #a8a836;
+        --color-primary-soft: #f4f4e6;
+        --color-primary-hover: #929228;
+        --color-secondary: #0a4728;
         --color-success: #16a34a;
         --color-success-soft: #dcfce7;
         --color-neutral: #ffffff;
         --color-black: #000000;
 
         /* Surfaces & text */
-        --color-bg: #fafaf9;
+        --color-bg: transparent;
         --color-surface: #ffffff;
         --color-ink: #1c1c1c;
         --color-muted: #6b6b6b;
@@ -53,7 +54,7 @@
 
         /* Shadows */
         --shadow-card: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
-        --shadow-cta: 0 2px 4px rgba(254,133,0,.12), 0 8px 20px rgba(254,133,0,.18);
+        --shadow-cta: 0 2px 4px rgba(168,168,54,.15), 0 8px 20px rgba(168,168,54,.20);
         --shadow-bar: 0 1px 0 rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
 
         /* Motion */
@@ -82,9 +83,7 @@
          ============================================================ */
       .step1-wrapper {
         display: flex;
-        align-items: center;
         justify-content: center;
-        min-height: 100vh;
         padding: var(--space-5);
       }
 
@@ -104,6 +103,10 @@
         line-height: 1.5;
         width: 100%;
         max-width: 520px;
+        background: var(--color-surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-card);
+        padding: var(--space-5);
       }
 
       .calc-heading {
@@ -120,9 +123,9 @@
       }
 
       .calc-card {
-        background: var(--color-surface);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-card);
+        background: var(--color-subtle);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border);
         padding: var(--space-5);
       }
 
@@ -459,6 +462,10 @@
         max-width: 640px;
         margin: 0 auto;
         position: relative;
+        background: var(--color-surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-card);
+        overflow: hidden;
       }
 
       /* Sticky top bar */
@@ -565,9 +572,9 @@
 
       /* Add-asset card */
       .add-card {
-        background: var(--color-surface);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-card);
+        background: var(--color-subtle);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border);
         padding: var(--space-5);
         margin-bottom: var(--space-6);
       }
@@ -715,10 +722,10 @@
         grid-template-columns: 44px 1fr auto;
         align-items: center;
         gap: var(--space-3);
-        background: var(--color-surface);
+        background: var(--color-subtle);
         border-radius: var(--radius-md);
         padding: var(--space-3) var(--space-4);
-        box-shadow: var(--shadow-card);
+        border: 1px solid var(--color-border);
       }
       .asset-icon {
         width: 44px;
@@ -798,9 +805,9 @@
 
       /* Advanced disclosure */
       .advanced {
-        background: var(--color-surface);
+        background: var(--color-subtle);
         border-radius: var(--radius-md);
-        box-shadow: var(--shadow-card);
+        border: 1px solid var(--color-border);
         margin-bottom: var(--space-6);
         overflow: hidden;
       }
@@ -1053,10 +1060,10 @@
         margin: 0 0 var(--space-5);
       }
       .final-details {
-        background: var(--color-surface);
+        background: var(--color-subtle);
         border-radius: var(--radius-md);
         padding: var(--space-4) var(--space-5);
-        box-shadow: var(--shadow-card);
+        border: 1px solid var(--color-border);
         margin: 0 0 var(--space-5);
         text-align: left;
       }
@@ -1560,7 +1567,7 @@
 
       const TERM_OPTIONS = [24, 36, 48, 60];
 
-      const CRM_ENDPOINT = '/api/leads/complex-calc';
+      const CRM_ENDPOINT = 'https://www.uchat.com.au/api/iwh/ef2327b168a3136bb8ac5cdf8f967af3';
 
       // ============================================================
       // CALCULATION ENGINE
@@ -1937,28 +1944,136 @@
 
             leadSubmitting.value = true;
 
+            // Normalize SA phone to E.164 so WhatsApp can deliver (0XXXXXXXXX -> +27XXXXXXXXX)
+            const rawPhone = leadPhone.value.trim().replace(/\s+/g, '');
+            const phoneE164 = rawPhone.startsWith('+')
+              ? rawPhone
+              : rawPhone.startsWith('0')
+                ? '+27' + rawPhone.slice(1)
+                : '+' + rawPhone;
+
+            // Split full name into first + last
+            const fullName = leadName.value.trim().replace(/\s+/g, ' ');
+            const nameParts = fullName.split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName  = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
+            const assetsList = assets.value.map(a => ({
+              category: a.category_id,
+              market_value: a.market_value,
+              age_years: getAge(a.age_id).years,
+              condition: a.condition_id,
+              collateral_value: Math.round(calcCollateral(a)),
+            }));
+
+            const assetsSummary = assetsList
+              .map(a => `${a.category} (R${a.market_value.toLocaleString()})`)
+              .join('; ');
+
+            // Unique list of asset categories + the single biggest-contributing category
+            const uniqueCategories = [...new Set(assetsList.map(a => a.category))];
+            const assetCategoriesCsv = uniqueCategories.join(',');
+            const topAsset = assetsList
+              .slice()
+              .sort((a, b) => b.collateral_value - a.collateral_value)[0];
+            const topAssetCategory = topAsset ? topAsset.category : '';
+
+            // Goal maths for agent scripting
+            const goalDelta    = aggregate.value.max_loan - loanGoal.value;
+            const loanShortfall = goalDelta < 0 ? Math.abs(goalDelta) : 0;
+            const loanSurplus   = goalDelta > 0 ? goalDelta : 0;
+            const progressPctRounded = Math.round(progressPct.value);
+
+            // Simple lead score for CRM routing / priority
+            //   hot  = reached goal AND good credit
+            //   warm = reached goal OR (>= 70% of goal AND credit not weak)
+            //   cold = everything else
+            let leadScore = 'cold';
+            if (goalReached.value && creditRecord.value === 'good') {
+              leadScore = 'hot';
+            } else if (
+              goalReached.value ||
+              (progressPctRounded >= 70 && creditRecord.value !== 'weak')
+            ) {
+              leadScore = 'warm';
+            }
+
+            // Attribution: UTMs, referrer, landing URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const utmSource   = urlParams.get('utm_source')   || '';
+            const utmMedium   = urlParams.get('utm_medium')   || '';
+            const utmCampaign = urlParams.get('utm_campaign') || '';
+            const utmContent  = urlParams.get('utm_content')  || '';
+            const utmTerm     = urlParams.get('utm_term')     || '';
+            const pageUrl     = window.location.href;
+            const referrer    = document.referrer || '';
+
+            // Device heuristic
+            const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const device   = isMobile ? 'mobile' : 'desktop';
+
+            // Unique CRM contact id (UUID v4 where available, fallback otherwise).
+            // Maps to UChat's native "CRM Contact Id" identity field ($.crm_contact_id)
+            // so returning submissions can match the same bot user.
+            const crmContactId = (window.crypto && crypto.randomUUID)
+              ? crypto.randomUUID()
+              : 'lead-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+
             const payload = {
-              lead: {
-                name: leadName.value.trim(),
-                phone: leadPhone.value.trim(),
-                email: leadEmail.value.trim(),
-              },
+              // ----- Flat top-level keys for UChat JSON Path Mapping -----
+              // Identity
+              crm_contact_id: crmContactId,
+              name: fullName,
+              first_name: firstName,
+              last_name: lastName,
+              phone: phoneE164,
+              email: leadEmail.value.trim(),
+
+              // Loan request & result
               loan_goal: loanGoal.value,
-              assets: assets.value.map(a => ({
-                category: a.category_id,
-                market_value: a.market_value,
-                age_years: getAge(a.age_id).years,
-                condition: a.condition_id,
-                collateral_value: Math.round(calcCollateral(a)),
-              })),
+              step1_amount: loanGoal.value,
+              max_loan: aggregate.value.max_loan,
+              monthly_payment: aggregate.value.monthly_payment,
+              total_repayment: aggregate.value.total_repayment,
+              total_finance_cost: aggregate.value.total_finance_cost,
+              total_collateral: aggregate.value.total_collateral,
+              loan_shortfall: loanShortfall,
+              loan_surplus: loanSurplus,
+              progress_pct: progressPctRounded,
+              goal_reached: goalReached.value,
+              lead_score: leadScore,
+
+              // Application inputs
+              credit_record: creditRecord.value,
+              loan_term_months: loanTermMonths.value,
+              annual_interest_rate: annualInterestRate.value,
+
+              // Assets
+              assets_count: assetsList.length,
+              assets_summary: assetsSummary,
+              asset_categories: assetCategoriesCsv,
+              top_asset_category: topAssetCategory,
+
+              // Attribution / context
+              source: 'complex-calc',
+              page_url: pageUrl,
+              referrer: referrer,
+              utm_source: utmSource,
+              utm_medium: utmMedium,
+              utm_campaign: utmCampaign,
+              utm_content: utmContent,
+              utm_term: utmTerm,
+              device: device,
+              submitted_at: new Date().toISOString(),
+
+              // ----- Full nested structure kept for debugging / future use -----
+              assets: assetsList,
               application: {
                 credit_record: creditRecord.value,
                 loan_term_months: loanTermMonths.value,
                 annual_interest_rate: annualInterestRate.value,
               },
               result: aggregate.value,
-              source: 'complex-calc',
-              timestamp: new Date().toISOString(),
             };
 
             finalResult.value = aggregate.value;
@@ -1981,9 +2096,23 @@
 
           // ==================== WATCHERS ====================
 
-          // Step 1: reveal sequence (fires exactly once)
+          // Step 1: reveal sequence (animated on first valid, instant on repeat)
           watch(isValid, (valid) => {
-            if (!valid || revealStarted) return;
+            if (!valid) {
+              // Input cleared — reset to clean state
+              showAdvisor.value = false;
+              bubbleReady.value = false;
+              ctaReady.value = false;
+              return;
+            }
+            if (revealStarted) {
+              // Already seen the animation — show instantly
+              showAdvisor.value = true;
+              bubbleReady.value = true;
+              ctaReady.value = true;
+              return;
+            }
+            // First time — play the animation sequence
             revealStarted = true;
             setTimeout(() => { showAdvisor.value = true;  }, 380);
             setTimeout(() => { bubbleReady.value = true;  }, 1180);

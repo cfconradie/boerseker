@@ -192,6 +192,141 @@
       .top-bar-edit:hover { color: var(--color-ink); }
 
       /* ============================================================
+         5b. STEP INDICATOR (wizard)
+         ============================================================ */
+      .step-indicator {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--color-surface);
+        padding: var(--space-4) var(--space-5);
+        box-shadow: var(--shadow-bar);
+        border-bottom: 1px solid var(--color-border);
+      }
+      .step-indicator-row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+      .step-dot {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        cursor: default;
+        background: transparent;
+        border: 0;
+        padding: 0;
+        font-family: inherit;
+      }
+      .step-dot.is-clickable { cursor: pointer; }
+      .step-dot-circle {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--color-track);
+        color: var(--color-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        transition: background var(--duration-fast) var(--ease-out),
+                    color var(--duration-fast) var(--ease-out);
+      }
+      .step-dot.is-active .step-dot-circle {
+        background: var(--color-primary);
+        color: var(--color-neutral);
+      }
+      .step-dot.is-done .step-dot-circle {
+        background: var(--color-success);
+        color: var(--color-neutral);
+      }
+      .step-dot-label {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: var(--color-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        text-align: center;
+        line-height: 1.2;
+      }
+      .step-dot.is-active .step-dot-label { color: var(--color-ink); }
+      .step-connector {
+        flex: 0 0 16px;
+        height: 2px;
+        background: var(--color-track);
+        margin-top: -16px;
+      }
+      .step-connector.is-done { background: var(--color-success); }
+
+      /* Wizard nav (back/next at step bottom) */
+      .wizard-nav {
+        display: flex;
+        gap: var(--space-3);
+        margin-top: var(--space-5);
+      }
+      .wizard-nav-back {
+        flex: 0 0 auto;
+        padding: 16px 20px;
+        background: var(--color-surface);
+        color: var(--color-ink);
+        border: 1.5px solid var(--color-border);
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .wizard-nav-back:hover { background: var(--color-subtle); }
+      .wizard-nav-next {
+        flex: 1;
+        padding: 18px 22px;
+        background: var(--color-primary);
+        color: var(--color-neutral);
+        border: 0;
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 1.0625rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: var(--shadow-cta);
+      }
+      .wizard-nav-next:disabled {
+        background: var(--color-track);
+        color: #a8a29e;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      .wizard-nav-next:hover:not(:disabled) { background: var(--color-primary-hover); }
+
+      .step-stub {
+        background: var(--color-subtle);
+        border: 1.5px dashed var(--color-border);
+        border-radius: var(--radius-md);
+        padding: var(--space-5);
+        color: var(--color-muted);
+        font-size: 0.9375rem;
+      }
+      .step-stub h3 {
+        margin: 0 0 var(--space-2);
+        color: var(--color-ink);
+        font-size: 1rem;
+      }
+
+      /* Step transitions */
+      .step-enter-active,
+      .step-leave-active {
+        transition: opacity var(--duration-base) var(--ease-out),
+                    transform var(--duration-base) var(--ease-out);
+      }
+      .step-enter-from { opacity: 0; transform: translateX(16px); }
+      .step-leave-to   { opacity: 0; transform: translateX(-16px); }
+      .step-leave-active { position: absolute; left: 0; right: 0; }
+
+      /* ============================================================
          6. MAIN CALC AREA
          ============================================================ */
       .calc-main {
@@ -807,8 +942,34 @@
   <body>
     <div id="boerseker-complex-calc" class="boerseker-complex-calc" v-cloak>
 
+      <!-- ==================== STEP INDICATOR (steps 2-4) ==================== -->
+      <header v-if="!showFinalResult && currentStep > 1" class="step-indicator">
+        <div class="step-indicator-row">
+          <template v-for="(s, i) in STEPS" :key="s.n">
+            <button type="button"
+                    class="step-dot"
+                    :class="{
+                      'is-active': currentStep === s.n,
+                      'is-done':   currentStep >  s.n,
+                      'is-clickable': currentStep > s.n
+                    }"
+                    :disabled="currentStep <= s.n"
+                    @click="currentStep > s.n && goToStep(s.n)">
+              <span class="step-dot-circle">{{ currentStep > s.n ? '✓' : s.n }}</span>
+              <span class="step-dot-label">{{ s.label }}</span>
+            </button>
+            <span v-if="i < STEPS.length - 1"
+                  class="step-connector"
+                  :class="{ 'is-done': currentStep > s.n }"></span>
+          </template>
+        </div>
+      </header>
+
       <!-- ==================== CALCULATOR VIEW ==================== -->
       <template v-if="!showFinalResult">
+
+        <!-- ==================== STEP 1: Jou bates ==================== -->
+        <template v-if="currentStep === 1">
 
         <!-- Sticky top bar with progress -->
         <header class="top-bar" role="status" aria-live="polite">
@@ -999,15 +1160,43 @@
             </div>
           </details>
 
-          <!-- GATED CTA -->
+          <!-- WIZARD NAV (Step 1) -->
           <button
             type="button"
             class="cta-bottom"
             :class="{ 'is-reached': goalReached && assets.length > 0 }"
             :disabled="assets.length === 0"
-            @click="openLeadForm"
-          >{{ ctaLabel }}</button>
+            @click="nextStep"
+          >Volgende → Jou krediet</button>
 
+        </main>
+        </template>
+        <!-- ==================== END STEP 1 ==================== -->
+
+        <!-- ==================== STEP 2: Jou krediet ==================== -->
+        <main v-if="currentStep === 2" class="calc-main">
+          <h2 class="section-heading">Jou krediet</h2>
+          <div class="step-stub">
+            <h3>Komende: individu / maatskappy + lewendige paaiement</h3>
+            Hierdie stap kry binnekort 'n radio-keuse (Individu/Maatskappy), krediet rekord, termyn, koers, en 'n lewendige berekening van jou maandelikse paaiement.
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="wizard-nav-back" @click="prevStep">← Terug</button>
+            <button type="button" class="wizard-nav-next" @click="nextStep">Volgende → Kontakbesonderhede</button>
+          </div>
+        </main>
+
+        <!-- ==================== STEP 3: Kontakbesonderhede ==================== -->
+        <main v-if="currentStep === 3" class="calc-main">
+          <h2 class="section-heading">Kontakbesonderhede</h2>
+          <div class="step-stub">
+            <h3>Komende: naam, van, selfoon, e-pos</h3>
+            Dieselfde velde wat voorheen in 'n pop-up was, kry hier 'n permanente plek met validering.
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="wizard-nav-back" @click="prevStep">← Terug</button>
+            <button type="button" class="wizard-nav-next" @click="submitFromStep3">Stuur aansoek →</button>
+          </div>
         </main>
       </template>
 
@@ -1232,6 +1421,28 @@
         setup() {
           // ----- Constants exposed to template -----
           // (template can access these via the returned object)
+
+          // ----- Wizard step state -----
+          const STEPS = [
+            { n: 1, label: 'Bates' },
+            { n: 2, label: 'Krediet' },
+            { n: 3, label: 'Kontak' },
+          ];
+          const currentStep = ref(1);
+          function goToStep(n) {
+            if (n < 1 || n > STEPS.length) return;
+            currentStep.value = n;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+          function nextStep() {
+            if (currentStep.value === 1 && assets.value.length === 0) return;
+            goToStep(currentStep.value + 1);
+          }
+          function prevStep() { goToStep(currentStep.value - 1); }
+          function submitFromStep3() {
+            // Placeholder until Step 3 form is wired up — reuse existing submit path
+            submitLead();
+          }
 
           // ----- State: loan goal -----
           const loanGoal = ref(500000);
@@ -1533,6 +1744,9 @@
           });
 
           return {
+            // Wizard
+            STEPS, currentStep, goToStep, nextStep, prevStep, submitFromStep3,
+
             // Constants
             CATEGORIES, AGE_BRACKETS, CONDITIONS, CREDIT_OPTIONS, TERM_OPTIONS,
 

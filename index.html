@@ -446,6 +446,298 @@
       }
 
       /* ============================================================
+         4b. WIZARD STEP INDICATOR + NAV
+         ============================================================ */
+      .step-indicator {
+        background: var(--color-surface);
+        padding: var(--space-4) var(--space-5);
+        border-bottom: 1px solid var(--color-border);
+      }
+      .step-indicator-row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+      .step-dot {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        background: transparent;
+        border: 0;
+        padding: 0;
+        font-family: inherit;
+        cursor: default;
+      }
+      .step-dot.is-clickable { cursor: pointer; }
+      .step-dot-circle {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--color-track);
+        color: var(--color-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        transition: background 180ms, color 180ms;
+      }
+      .step-dot.is-active .step-dot-circle {
+        background: var(--color-primary);
+        color: var(--color-neutral);
+      }
+      .step-dot.is-done .step-dot-circle {
+        background: var(--color-success, #16a34a);
+        color: #fff;
+      }
+      .step-dot-label {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: var(--color-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        text-align: center;
+      }
+      .step-dot.is-active .step-dot-label { color: var(--color-ink); }
+      .step-connector {
+        flex: 0 0 16px;
+        height: 2px;
+        background: var(--color-track);
+        margin-top: -16px;
+      }
+      .step-connector.is-done { background: var(--color-success, #16a34a); }
+
+      .wizard-nav {
+        display: flex;
+        gap: var(--space-3);
+        margin-top: var(--space-5);
+      }
+      .wizard-nav-back {
+        flex: 0 0 auto;
+        padding: 16px 20px;
+        background: var(--color-surface);
+        color: var(--color-ink);
+        border: 1.5px solid var(--color-border);
+        border-radius: var(--radius-md);
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .wizard-nav-back:hover { background: var(--color-subtle, #f5f5f4); }
+      .wizard-nav-next {
+        flex: 1;
+        padding: 18px 22px;
+        background: var(--color-primary);
+        color: var(--color-neutral);
+        border: 0;
+        border-radius: var(--radius-md);
+        font: inherit;
+        font-size: 1.0625rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .wizard-nav-next:disabled { background: var(--color-track); color: #a8a29e; cursor: not-allowed; }
+      .wizard-nav-next:hover:not(:disabled) { background: var(--color-primary-hover); }
+
+      .step-stub {
+        background: var(--color-subtle, #f5f5f4);
+        border: 1.5px dashed var(--color-border);
+        border-radius: var(--radius-md);
+        padding: var(--space-5);
+        color: var(--color-muted);
+        font-size: 0.9375rem;
+      }
+      .step-stub h3 {
+        margin: 0 0 var(--space-2);
+        color: var(--color-ink);
+        font-size: 1rem;
+      }
+
+      /* ============================================================
+         4c. STICKY MOBILE BOTTOM BAR (wizard CTAs)
+         ============================================================ */
+      .sticky-cta-bar {
+        position: sticky;
+        bottom: 0;
+        z-index: 9;
+        background: var(--color-surface);
+        border-top: 1px solid var(--color-border);
+        padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+        box-shadow: 0 -4px 16px rgba(0,0,0,.06);
+      }
+      .sticky-cta-bar .wizard-nav { margin-top: 0; }
+
+      .live-summary-strip {
+        position: sticky;
+        bottom: 0;
+        z-index: 9;
+        background: var(--color-surface);
+        border-top: 1px solid var(--color-border);
+        padding: var(--space-3) var(--space-4) calc(var(--space-2) + env(safe-area-inset-bottom));
+        box-shadow: 0 -4px 16px rgba(0,0,0,.06);
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--space-3);
+        font-variant-numeric: tabular-nums;
+      }
+      .live-summary-strip-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--color-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .live-summary-strip-amount {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--color-primary);
+      }
+      .live-summary-strip-suffix {
+        font-size: 0.8125rem;
+        color: var(--color-muted);
+        font-weight: 500;
+      }
+
+      /* ============================================================
+         4d. JOHAN HANDOFF BUBBLE (between submit and success)
+         ============================================================ */
+      .handoff {
+        max-width: 520px;
+        margin: 0 auto;
+        padding: var(--space-7) var(--space-5);
+        text-align: center;
+      }
+      .handoff-avatar {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: var(--color-primary-soft, #fff4e8);
+        color: var(--color-primary);
+        font-weight: 700;
+        font-size: 1.25rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: var(--space-4);
+      }
+      .handoff-bubble {
+        background: var(--color-surface);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-card);
+        padding: var(--space-4) var(--space-5);
+        font-size: 1rem;
+        color: var(--color-ink);
+        line-height: 1.5;
+      }
+      .handoff-typing {
+        display: inline-flex;
+        gap: 4px;
+        padding: 4px 0;
+      }
+      .handoff-typing span {
+        width: 8px;
+        height: 8px;
+        background: var(--color-muted);
+        border-radius: 50%;
+        animation: handoff-bounce 1.2s infinite;
+      }
+      .handoff-typing span:nth-child(2) { animation-delay: .15s; }
+      .handoff-typing span:nth-child(3) { animation-delay: .3s; }
+      @keyframes handoff-bounce {
+        0%, 60%, 100% { transform: translateY(0); opacity: .5; }
+        30% { transform: translateY(-4px); opacity: 1; }
+      }
+
+      /* ============================================================
+         4e. FINAL RESULT ACTION BUTTONS + REF + ERROR TOAST
+         ============================================================ */
+      .final-actions {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        margin: var(--space-5) 0 var(--space-4);
+      }
+      .final-action {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+        padding: 16px 20px;
+        border-radius: var(--radius-md);
+        font: inherit;
+        font-size: 1rem;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        border: 0;
+      }
+      .final-action-whatsapp {
+        background: #25d366;
+        color: #fff;
+      }
+      .final-action-whatsapp:hover { background: #1ebe5b; }
+      .final-action-call {
+        background: var(--color-surface);
+        color: var(--color-ink);
+        border: 1.5px solid var(--color-border);
+      }
+      .final-action-call:hover { background: var(--color-subtle, #f5f5f4); }
+      .final-ref {
+        font-size: 0.75rem;
+        color: var(--color-muted);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.04em;
+        margin: var(--space-2) 0 0;
+      }
+
+      .submit-error {
+        margin-top: var(--space-4);
+        background: #fef2f2;
+        border: 1.5px solid #fecaca;
+        border-radius: var(--radius-md);
+        padding: var(--space-4);
+        color: #991b1b;
+        font-size: 0.875rem;
+      }
+      .submit-error strong { color: #7f1d1d; }
+      .submit-error a {
+        display: inline-block;
+        margin-top: var(--space-2);
+        color: #991b1b;
+        font-weight: 700;
+        text-decoration: underline;
+      }
+
+      .field-help {
+        font-size: 0.75rem;
+        color: var(--color-muted);
+        margin: var(--space-1) 0 0;
+        line-height: 1.4;
+      }
+
+      .rate-toggle {
+        background: transparent;
+        border: 0;
+        font: inherit;
+        font-size: 0.8125rem;
+        color: var(--color-muted);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        cursor: pointer;
+        padding: 0;
+        margin-top: var(--space-2);
+      }
+      .rate-toggle:hover { color: var(--color-ink); }
+
+      @media (max-width: 480px) {
+        .chip-group .chip { flex: 1 1 calc(50% - var(--space-2)); justify-content: center; }
+      }
+
+      /* ============================================================
          5. COMPLEX CALC — scoped to .boerseker-complex-calc
          ============================================================ */
       .boerseker-complex-calc,
@@ -1215,9 +1507,6 @@
                     Ja, kom ons kyk
                     <span class="cta-primary-arrow" aria-hidden="true">→</span>
                   </button>
-                  <button class="cta-ghost" type="button" @click="handleGhostClick">
-                    Ek loer net rond
-                  </button>
                 </div>
               </transition>
 
@@ -1234,11 +1523,35 @@
         </div>
       </div>
 
-      <!-- ==================== STEP 2: DETAILED CALCULATOR ==================== -->
+      <!-- ==================== STEP 2: DETAILED CALCULATOR (wizard) ==================== -->
       <template v-if="currentStep === 2 && !showFinalResult">
         <div class="boerseker-complex-calc">
 
-          <header class="top-bar" role="status" aria-live="polite">
+          <!-- Wizard step indicator -->
+          <div class="step-indicator">
+            <div class="step-indicator-row">
+              <template v-for="(s, i) in WIZARD_STEPS" :key="s.n">
+                <button type="button"
+                        class="step-dot"
+                        :class="{
+                          'is-active': wizardStep === s.n,
+                          'is-done':   wizardStep >  s.n,
+                          'is-clickable': wizardStep > s.n
+                        }"
+                        :disabled="wizardStep <= s.n"
+                        @click="wizardStep > s.n && goToWizardStep(s.n)">
+                  <span class="step-dot-circle">{{ wizardStep > s.n ? '✓' : s.n }}</span>
+                  <span class="step-dot-label">{{ s.label }}</span>
+                </button>
+                <span v-if="i < WIZARD_STEPS.length - 1"
+                      class="step-connector"
+                      :class="{ 'is-done': wizardStep > s.n }"></span>
+              </template>
+            </div>
+          </div>
+
+          <!-- Top progress bar (only on Bates step) -->
+          <header v-if="wizardStep === 1" class="top-bar" role="status" aria-live="polite">
             <div class="top-bar-header">
               <span class="top-bar-label">Vordering na jou doel</span>
               <span class="top-bar-percent" :class="{ 'is-reached': goalReached }">{{ progressPctLabel }}</span>
@@ -1257,7 +1570,8 @@
             <a class="top-bar-edit" href="#" @click.prevent="currentStep = 1">← Wysig bedrag</a>
           </header>
 
-          <main class="calc-main">
+          <!-- ===== WIZARD STEP 1: BATES ===== -->
+          <main v-if="wizardStep === 1" class="calc-main">
 
             <section>
               <h2 class="section-heading">Wat besit jy?</h2>
@@ -1339,7 +1653,6 @@
               <h2 class="section-heading">Jou bates ({{ assets.length }})</h2>
 
               <div v-if="assets.length === 0" class="empty-state">
-                <span class="empty-state-icon" aria-hidden="true">🚜</span>
                 Voeg jou eerste bate hierbo by om te begin.
               </div>
 
@@ -1363,46 +1676,89 @@
               </transition-group>
             </section>
 
-            <details class="advanced">
-              <summary class="advanced-summary">
-                <span>Gevorderd · krediet, termyn, koers</span>
-              </summary>
-              <div class="advanced-body">
+          </main>
 
-                <div class="advanced-field">
-                  <label class="advanced-field-label">Krediet rekord</label>
-                  <div class="chip-group">
-                    <button v-for="cr in CREDIT_OPTIONS" :key="cr.id"
-                            type="button"
-                            class="chip"
-                            :class="{ 'is-active': creditRecord === cr.id }"
-                            :aria-pressed="creditRecord === cr.id"
-                            @click="creditRecord = cr.id">
-                      {{ cr.label }}
-                    </button>
-                  </div>
-                  <p class="advanced-field-help">Beïnvloed die LTV (30%–40%)</p>
+          <!-- Sticky CTA on Bates step (always-visible Volgende) -->
+          <div v-if="wizardStep === 1" class="sticky-cta-bar">
+            <button
+              type="button"
+              class="wizard-nav-next"
+              style="width: 100%;"
+              :disabled="assets.length === 0"
+              @click="nextWizardStep"
+            >
+              {{ assets.length === 0 ? 'Voeg minstens een bate by' : (goalReached ? '✓ Volgende → Jou krediet' : 'Volgende → Jou krediet') }}
+            </button>
+          </div>
+
+          <!-- ===== WIZARD STEP 2: KREDIET ===== -->
+          <main v-if="wizardStep === 2" class="calc-main">
+            <h2 class="section-heading">Jou krediet</h2>
+
+            <div class="add-card">
+
+              <div class="add-field">
+                <label class="add-field-label">Aansoek as</label>
+                <div class="chip-group" role="radiogroup" aria-label="Aansoek tipe">
+                  <button type="button"
+                          class="chip"
+                          :class="{ 'is-active': applicantType === 'individu' }"
+                          :aria-pressed="applicantType === 'individu'"
+                          @click="applicantType = 'individu'">
+                    <span class="chip-icon" aria-hidden="true">👤</span>
+                    <span>Individu</span>
+                  </button>
+                  <button type="button"
+                          class="chip"
+                          :class="{ 'is-active': applicantType === 'besigheid' }"
+                          :aria-pressed="applicantType === 'besigheid'"
+                          @click="applicantType = 'besigheid'">
+                    <span class="chip-icon" aria-hidden="true">🏢</span>
+                    <span>Besigheid</span>
+                  </button>
                 </div>
+              </div>
 
-                <div class="advanced-field">
-                  <label class="advanced-field-label">Termyn (maande)</label>
-                  <div class="chip-group">
-                    <button v-for="term in TERM_OPTIONS" :key="term"
-                            type="button"
-                            class="chip"
-                            :class="{ 'is-active': loanTermMonths === term }"
-                            :aria-pressed="loanTermMonths === term"
-                            @click="loanTermMonths = term">
-                      {{ term }} mnd
-                    </button>
-                  </div>
+              <div class="add-field">
+                <label class="add-field-label">Krediet rekord</label>
+                <div class="chip-group">
+                  <button v-for="cr in CREDIT_OPTIONS" :key="cr.id"
+                          type="button"
+                          class="chip"
+                          :class="{ 'is-active': creditRecord === cr.id }"
+                          :aria-pressed="creditRecord === cr.id"
+                          @click="creditRecord = cr.id">
+                    {{ cr.label }}
+                  </button>
                 </div>
+                <p class="field-help">
+                  Goed = geen versuimings · Gemiddeld = 1–2 · Swak = 3+ of tans agterstallig
+                </p>
+              </div>
 
-                <div class="advanced-field">
-                  <label class="advanced-field-label" for="advanced-rate">Jaarlikse rente koers</label>
+              <div class="add-field">
+                <label class="add-field-label">Termyn (maande)</label>
+                <div class="chip-group">
+                  <button v-for="term in TERM_OPTIONS" :key="term"
+                          type="button"
+                          class="chip"
+                          :class="{ 'is-active': loanTermMonths === term }"
+                          :aria-pressed="loanTermMonths === term"
+                          @click="loanTermMonths = term">
+                    {{ term }} mnd
+                  </button>
+                </div>
+              </div>
+
+              <div class="add-field">
+                <button type="button" class="rate-toggle" @click="rateOpen = !rateOpen">
+                  {{ rateOpen ? '− Versteek koers' : '+ Wysig rente koers (' + annualInterestRatePct + '%)' }}
+                </button>
+                <div v-if="rateOpen" style="margin-top: var(--space-3);">
+                  <label class="add-field-label" for="krediet-rate">Jaarlikse rente koers</label>
                   <div class="add-input-wrapper">
                     <input
-                      id="advanced-rate"
+                      id="krediet-rate"
                       class="add-input"
                       type="number"
                       inputmode="decimal"
@@ -1414,22 +1770,155 @@
                     >
                     <span class="add-input-prefix" aria-hidden="true">%</span>
                   </div>
+                  <p class="field-help">Johan onderhandel die finale koers met die bank.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="wizard-nav">
+              <button type="button" class="wizard-nav-back" @click="prevWizardStep">← Terug</button>
+              <button type="button" class="wizard-nav-next" @click="nextWizardStep">Volgende → Kontak</button>
+            </div>
+          </main>
+
+          <!-- Live repayment sticky strip on Krediet step -->
+          <div v-if="wizardStep === 2 && assets.length > 0" class="live-summary-strip" aria-live="polite">
+            <span class="live-summary-strip-label">Per maand</span>
+            <span>
+              <span class="live-summary-strip-amount">{{ formatZAR(aggregate.monthly_payment) }}</span>
+              <span class="live-summary-strip-suffix">vir {{ loanTermMonths }} mnd</span>
+            </span>
+          </div>
+
+          <!-- ===== WIZARD STEP 3: KONTAK ===== -->
+          <main v-if="wizardStep === 3" class="calc-main">
+            <h2 class="section-heading">Kontakbesonderhede</h2>
+
+            <form class="add-card" @submit.prevent="submitLead" novalidate>
+
+              <!-- Company fields (only if besigheid) -->
+              <template v-if="applicantType === 'besigheid'">
+                <div class="lead-form-field">
+                  <label class="lead-form-label" for="lead-company-name">Maatskappynaam</label>
+                  <input id="lead-company-name"
+                         class="lead-form-input"
+                         :class="{ 'is-error': leadErrors.companyName }"
+                         type="text"
+                         autocomplete="organization"
+                         v-model="companyName"
+                         @blur="validateLeadField('companyName')">
+                  <p class="lead-form-error">{{ leadErrors.companyName || '' }}</p>
                 </div>
 
+                <div class="lead-form-field">
+                  <label class="lead-form-label" for="lead-company-reg">Registrasienommer</label>
+                  <input id="lead-company-reg"
+                         class="lead-form-input"
+                         :class="{ 'is-error': leadErrors.companyReg }"
+                         type="text"
+                         placeholder="2020/123456/07"
+                         v-model="companyReg"
+                         @blur="validateLeadField('companyReg')">
+                  <p class="lead-form-error">{{ leadErrors.companyReg || '' }}</p>
+                </div>
+
+                <div class="lead-form-field">
+                  <label class="lead-form-label" for="lead-company-vat">BTW-nommer (opsioneel)</label>
+                  <input id="lead-company-vat"
+                         class="lead-form-input"
+                         type="text"
+                         v-model="companyVat">
+                </div>
+              </template>
+
+              <!-- Contact fields (always) -->
+              <div class="lead-form-field">
+                <label class="lead-form-label" for="lead-first-name-step">Naam</label>
+                <input id="lead-first-name-step"
+                       class="lead-form-input"
+                       :class="{ 'is-error': leadErrors.firstName }"
+                       type="text"
+                       autocomplete="given-name"
+                       v-model="leadFirstName"
+                       @blur="validateLeadField('firstName')">
+                <p class="lead-form-error">{{ leadErrors.firstName || '' }}</p>
               </div>
-            </details>
 
-            <button
-              type="button"
-              class="cta-bottom"
-              :class="{ 'is-reached': goalReached && assets.length > 0 }"
-              :disabled="assets.length === 0"
-              @click="openLeadForm"
-            >{{ ctaLabel }}</button>
+              <div class="lead-form-field">
+                <label class="lead-form-label" for="lead-last-name-step">Van</label>
+                <input id="lead-last-name-step"
+                       class="lead-form-input"
+                       :class="{ 'is-error': leadErrors.lastName }"
+                       type="text"
+                       autocomplete="family-name"
+                       v-model="leadLastName"
+                       @blur="validateLeadField('lastName')">
+                <p class="lead-form-error">{{ leadErrors.lastName || '' }}</p>
+              </div>
 
+              <div class="lead-form-field">
+                <label class="lead-form-label" for="lead-phone-step">Selfoon</label>
+                <input id="lead-phone-step"
+                       class="lead-form-input"
+                       :class="{ 'is-error': leadErrors.phone }"
+                       type="tel"
+                       inputmode="tel"
+                       autocomplete="tel"
+                       placeholder="082 123 4567"
+                       v-model="leadPhone"
+                       @blur="validateLeadField('phone')">
+                <p class="lead-form-error">{{ leadErrors.phone || '' }}</p>
+              </div>
+
+              <div class="lead-form-field">
+                <label class="lead-form-label" for="lead-email-step">E-pos</label>
+                <input id="lead-email-step"
+                       class="lead-form-input"
+                       :class="{ 'is-error': leadErrors.email }"
+                       type="email"
+                       inputmode="email"
+                       autocomplete="email"
+                       placeholder="jy@plaas.co.za"
+                       v-model="leadEmail"
+                       @blur="validateLeadField('email')">
+                <p class="lead-form-error">{{ leadErrors.email || '' }}</p>
+              </div>
+
+              <p class="field-help" style="margin-top: var(--space-3);">
+                Johan stuur 'n WhatsApp na <strong>{{ leadPhone || 'jou nommer' }}</strong> sodra ons jou aansoek ontvang.
+              </p>
+
+              <div class="wizard-nav">
+                <button type="button" class="wizard-nav-back" @click="prevWizardStep">← Terug</button>
+                <button type="submit"
+                        class="wizard-nav-next"
+                        :disabled="!stepFormValid || leadSubmitting">
+                  {{ leadSubmitting ? 'Stuur...' : 'Laat Johan weet →' }}
+                </button>
+              </div>
+
+              <div v-if="submitState === 'error'" class="submit-error" role="alert">
+                <strong>Hmm —</strong> {{ submitError }}
+                <br>
+                <a :href="'https://wa.me/' + BUSINESS_WHATSAPP">💬 WhatsApp Johan direk</a>
+              </div>
+            </form>
           </main>
+
         </div>
       </template>
+
+      <!-- ==================== HANDOFF (between submit and success) ==================== -->
+      <transition name="final" appear>
+        <section v-if="submitState === 'handoff'" class="handoff" aria-live="polite">
+          <div class="handoff-avatar" aria-hidden="true">JV</div>
+          <div class="handoff-bubble">
+            Ek het jou aansoek ontvang, <strong>{{ leadFirstName }}</strong>.
+            Ek kyk gou na die syfers
+            <span class="handoff-typing" aria-hidden="true"><span></span><span></span><span></span></span>
+          </div>
+        </section>
+      </transition>
 
       <!-- ==================== FINAL RESULT ==================== -->
       <transition name="final" appear>
@@ -1441,105 +1930,33 @@
           <p class="final-amount">{{ formatZAR(finalResult.max_loan) }}</p>
 
           <dl class="final-details">
-            <dt>Maandelikse paaiement</dt>
+            <dt>Per maand</dt>
             <dd>{{ formatZAR(finalResult.monthly_payment) }}</dd>
-            <dt>Termyn</dt>
+            <dt>Oor</dt>
             <dd>{{ loanTermMonths }} maande</dd>
             <dt>Totale terugbetaling</dt>
             <dd>{{ formatZAR(finalResult.total_repayment) }}</dd>
-            <dt>Totale finansieringskoste</dt>
-            <dd>{{ formatZAR(finalResult.total_finance_cost) }}</dd>
           </dl>
 
           <p class="final-promise">
-            <strong>Johan</strong> kontak jou binne <strong>2 ure</strong> om die volgende stap te bespreek.
+            Johan stuur jou nou 'n <strong>WhatsApp</strong> op
+            <strong>{{ leadPhone }}</strong>. Hou jou foon byderhand.
           </p>
-        </section>
-      </transition>
 
-      <!-- ==================== LEAD FORM MODAL ==================== -->
-      <transition name="modal-fade">
-        <div v-if="leadFormOpen" class="modal-overlay" @click.self="closeLeadForm">
-          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="lead-modal-title">
-            <button type="button" class="modal-close" @click="closeLeadForm" aria-label="Maak toe">×</button>
-
-            <h2 id="lead-modal-title" class="modal-title">Net 'n laaste ding</h2>
-            <p class="modal-subtitle">Sodat Johan jou kan terugkontak met jou werklike syfers.</p>
-
-            <form @submit.prevent="submitLead" novalidate>
-              <div class="lead-form-field">
-                <label class="lead-form-label" for="lead-first-name">Naam</label>
-                <input
-                  id="lead-first-name"
-                  class="lead-form-input"
-                  :class="{ 'is-error': leadErrors.firstName }"
-                  type="text"
-                  autocomplete="given-name"
-                  v-model="leadFirstName"
-                  @blur="validateLeadField('firstName')"
-                >
-                <p class="lead-form-error">{{ leadErrors.firstName || '' }}</p>
-              </div>
-
-              <div class="lead-form-field">
-                <label class="lead-form-label" for="lead-last-name">Van</label>
-                <input
-                  id="lead-last-name"
-                  class="lead-form-input"
-                  :class="{ 'is-error': leadErrors.lastName }"
-                  type="text"
-                  autocomplete="family-name"
-                  v-model="leadLastName"
-                  @blur="validateLeadField('lastName')"
-                >
-                <p class="lead-form-error">{{ leadErrors.lastName || '' }}</p>
-              </div>
-
-              <div class="lead-form-field">
-                <label class="lead-form-label" for="lead-phone">Selfoon</label>
-                <input
-                  id="lead-phone"
-                  class="lead-form-input"
-                  :class="{ 'is-error': leadErrors.phone }"
-                  type="tel"
-                  inputmode="tel"
-                  autocomplete="tel"
-                  placeholder="082 123 4567"
-                  v-model="leadPhone"
-                  @blur="validateLeadField('phone')"
-                >
-                <p class="lead-form-error">{{ leadErrors.phone || '' }}</p>
-              </div>
-
-              <div class="lead-form-field">
-                <label class="lead-form-label" for="lead-email">E-pos</label>
-                <input
-                  id="lead-email"
-                  class="lead-form-input"
-                  :class="{ 'is-error': leadErrors.email }"
-                  type="email"
-                  inputmode="email"
-                  autocomplete="email"
-                  placeholder="jy@plaas.co.za"
-                  v-model="leadEmail"
-                  @blur="validateLeadField('email')"
-                >
-                <p class="lead-form-error">{{ leadErrors.email || '' }}</p>
-              </div>
-
-              <button
-                type="submit"
-                class="lead-submit"
-                :disabled="!leadFormValid || leadSubmitting"
-              >{{ leadSubmitting ? 'Stuur...' : 'Wys my my lening →' }}</button>
-
-              <div class="modal-trust">
-                <span class="modal-trust-chip">🔒 Veilig en POPIA voldoende</span>
-                <span class="modal-trust-chip">⏱ Antwoord binne 2 uur</span>
-              </div>
-            </form>
+          <div class="final-actions">
+            <a class="final-action final-action-whatsapp"
+               :href="'https://wa.me/' + BUSINESS_WHATSAPP + '?text=' + encodeURIComponent('Hi Johan, my verwysing is ' + referenceId + '. Kan ons gesels?')"
+               target="_blank" rel="noopener">
+              💬 Open WhatsApp met Johan
+            </a>
+            <a class="final-action final-action-call"
+               :href="'tel:' + BUSINESS_PHONE">
+              📞 Bel Johan ({{ BUSINESS_PHONE }})
+            </a>
           </div>
-        </div>
+
+          <p class="final-ref">Verwysing: {{ referenceId }}</p>
+        </section>
       </transition>
 
     </div>
@@ -1550,7 +1967,7 @@
       // ============================================================
       const CATEGORIES = [
         { id: 'tractor',                label: 'Trekker',     icon: '🚜' },
-        { id: 'attachments_implements', label: 'Implements',  icon: '🔧' },
+        { id: 'attachments_implements', label: 'Bykomstukke', icon: '🔧' },
         { id: 'sprayer',                label: 'Sproei',      icon: '💦' },
         { id: 'planter',                label: 'Planter',     icon: '🌱' },
         { id: 'baler_forage',           label: 'Baler',       icon: '🌾' },
@@ -1582,6 +1999,12 @@
       const TERM_OPTIONS = [24, 36, 48, 60];
 
       const CRM_ENDPOINT = 'https://www.uchat.com.au/api/iwh/ef2327b168a3136bb8ac5cdf8f967af3';
+
+      // Boerseker broker contact (for fallback CTAs on final screen).
+      // Replace these with real production numbers before launch.
+      const BUSINESS_WHATSAPP = '27821234567'; // E.164 without +
+      const BUSINESS_PHONE    = '+27821234567';
+      const BUSINESS_NAME     = 'Johan';
 
       // ============================================================
       // CALCULATION ENGINE
@@ -1666,6 +2089,28 @@
           // ----- Shared -----
           const currentStep = ref(1);
 
+          // ----- Wizard sub-steps (within currentStep === 2) -----
+          const WIZARD_STEPS = [
+            { n: 1, label: 'Bates' },
+            { n: 2, label: 'Krediet' },
+            { n: 3, label: 'Kontak' },
+          ];
+          const wizardStep = ref(1);
+          const rateOpen = ref(false);
+          const submitState = ref('idle'); // 'idle' | 'submitting' | 'handoff' | 'error'
+          const submitError = ref('');
+          const referenceId = ref('');
+          function goToWizardStep(n) {
+            if (n < 1 || n > WIZARD_STEPS.length) return;
+            wizardStep.value = n;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+          function nextWizardStep() {
+            if (wizardStep.value === 1 && assets.value.length === 0) return;
+            goToWizardStep(wizardStep.value + 1);
+          }
+          function prevWizardStep() { goToWizardStep(wizardStep.value - 1); }
+
           // ----- ZAR formatter (single instance) -----
           const zarFormat = new Intl.NumberFormat('af-ZA', {
             style: 'currency',
@@ -1708,6 +2153,10 @@
           const leadPhone      = ref('');
           const leadEmail      = ref('');
           const leadErrors     = ref({});
+          const applicantType  = ref('individu'); // 'individu' | 'besigheid'
+          const companyName    = ref('');
+          const companyReg     = ref('');
+          const companyVat     = ref('');
           const leadSubmitting = ref(false);
 
           const showFinalResult = ref(false);
@@ -1794,6 +2243,15 @@
             (annualInterestRate.value * 100).toFixed(1).replace(/\.0$/, '')
           );
 
+          const stepFormValid = computed(() =>
+            isValidName(leadFirstName.value)
+            && isValidName(leadLastName.value)
+            && isValidPhone(leadPhone.value)
+            && isValidEmail(leadEmail.value)
+            && (applicantType.value === 'individu' ||
+                (isValidName(companyName.value) && companyReg.value.trim().length >= 4))
+          );
+
           const leadFormValid = computed(() =>
             isValidName(leadFirstName.value)
             && isValidName(leadLastName.value)
@@ -1828,6 +2286,8 @@
             if (field === 'lastName')  errs.lastName  = isValidName(leadLastName.value)  ? '' : 'Voer asseblief jou van in';
             if (field === 'phone')     errs.phone     = isValidPhone(leadPhone.value)     ? '' : 'Gebruik \'n geldige SA selfoonnommer';
             if (field === 'email')     errs.email     = isValidEmail(leadEmail.value)     ? '' : 'Voer \'n geldige e-pos adres in';
+            if (field === 'companyName') errs.companyName = isValidName(companyName.value) ? '' : 'Voer maatskappynaam in';
+            if (field === 'companyReg')  errs.companyReg  = companyReg.value.trim().length >= 4 ? '' : 'Voer registrasienommer in';
             leadErrors.value = errs;
           }
 
@@ -2061,6 +2521,10 @@
               lead_score: leadScore,
 
               // Application inputs
+              applicant_type: applicantType.value,
+              company_name: companyName.value.trim(),
+              company_reg: companyReg.value.trim(),
+              company_vat: companyVat.value.trim(),
               credit_record: creditRecord.value,
               loan_term_months: loanTermMonths.value,
               annual_interest_rate: annualInterestRate.value,
@@ -2095,21 +2559,62 @@
 
             finalResult.value = aggregate.value;
 
+            // Generate a short, human-shareable reference: BSK-XXXXXX
+            referenceId.value = 'BSK-' + Date.now().toString(36).slice(-6).toUpperCase();
+            payload.reference_id = referenceId.value;
+
+            // Add the broker WhatsApp + reference into the payload so the next-phase
+            // WhatsApp bot can address the lead by reference and include their numbers.
+            payload.whatsapp_to = phoneE164;
+            payload.whatsapp_handoff_message =
+              'Hi ' + firstName + ', dis Johan van Boerseker. Ek het jou aansoek (' +
+              referenceId.value + ') ontvang — kom ons gesels oor jou ' +
+              formatZAR(aggregate.value.max_loan).replace(/\s/g, ' ') + ' lening.';
+
+            submitState.value = 'submitting';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            let crmOk = false;
             try {
-              await fetch(CRM_ENDPOINT, {
+              const resp = await fetch(CRM_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
               });
+              crmOk = resp.ok;
+              if (!resp.ok) console.warn('[Boerseker] CRM responded', resp.status);
             } catch (err) {
               console.warn('[Boerseker] CRM POST failed:', err);
-            } finally {
-              leadSubmitting.value = false;
-              leadFormOpen.value = false;
-              showFinalResult.value = true;
-              window.scrollTo({ top: 0, behavior: 'smooth' });
             }
+
+            if (!crmOk) {
+              leadSubmitting.value = false;
+              submitState.value = 'error';
+              submitError.value = 'Ons kon nie nou jou aansoek stuur nie. Bel of WhatsApp Johan direk — ons het jou inligting nog by die hand.';
+              return;
+            }
+
+            // Show the Johan handoff bubble for ~2.4s, then the final screen.
+            submitState.value = 'handoff';
+            await new Promise((r) => setTimeout(r, 2400));
+
+            leadSubmitting.value = false;
+            leadFormOpen.value = false;
+            submitState.value = 'idle';
+            showFinalResult.value = true;
+            try { localStorage.removeItem('boerseker_draft_v1'); } catch (_) {}
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }
+
+          // Clear company fields when switching back to Individu so stale data
+          // doesn't leak into the CRM payload.
+          watch(applicantType, (v) => {
+            if (v === 'individu') {
+              companyName.value = '';
+              companyReg.value  = '';
+              companyVat.value  = '';
+            }
+          });
 
           // ==================== WATCHERS ====================
 
@@ -2182,12 +2687,73 @@
             document.addEventListener('keydown', (e) => {
               if (e.key === 'Escape' && leadFormOpen.value) closeLeadForm();
             });
+
+            // ----- Silent draft restore (so a refresh doesn't wipe progress) -----
+            try {
+              const raw = localStorage.getItem('boerseker_draft_v1');
+              if (raw) {
+                const d = JSON.parse(raw);
+                if (Array.isArray(d.assets) && d.assets.length) {
+                  assets.value = d.assets;
+                  nextAssetId = d.assets.reduce((m, a) => Math.max(m, a.id || 0), 0) + 1;
+                }
+                if (typeof d.loanGoal === 'number')          loanGoal.value = d.loanGoal;
+                if (typeof d.creditRecord === 'string')      creditRecord.value = d.creditRecord;
+                if (typeof d.loanTermMonths === 'number')    loanTermMonths.value = d.loanTermMonths;
+                if (typeof d.annualInterestRate === 'number') annualInterestRate.value = d.annualInterestRate;
+                if (typeof d.applicantType === 'string')     applicantType.value = d.applicantType;
+                if (typeof d.companyName === 'string')       companyName.value = d.companyName;
+                if (typeof d.companyReg === 'string')        companyReg.value = d.companyReg;
+                if (typeof d.companyVat === 'string')        companyVat.value = d.companyVat;
+                if (typeof d.leadFirstName === 'string')     leadFirstName.value = d.leadFirstName;
+                if (typeof d.leadLastName === 'string')      leadLastName.value = d.leadLastName;
+                if (typeof d.leadPhone === 'string')         leadPhone.value = d.leadPhone;
+                if (typeof d.leadEmail === 'string')         leadEmail.value = d.leadEmail;
+              }
+            } catch (_) { /* ignore — draft restore is best-effort */ }
+
+            // Persist draft on any meaningful change. Debounced via raf.
+            let saveQueued = false;
+            function saveDraft() {
+              if (saveQueued) return;
+              saveQueued = true;
+              requestAnimationFrame(() => {
+                saveQueued = false;
+                try {
+                  localStorage.setItem('boerseker_draft_v1', JSON.stringify({
+                    assets: assets.value,
+                    loanGoal: loanGoal.value,
+                    creditRecord: creditRecord.value,
+                    loanTermMonths: loanTermMonths.value,
+                    annualInterestRate: annualInterestRate.value,
+                    applicantType: applicantType.value,
+                    companyName: companyName.value,
+                    companyReg: companyReg.value,
+                    companyVat: companyVat.value,
+                    leadFirstName: leadFirstName.value,
+                    leadLastName: leadLastName.value,
+                    leadPhone: leadPhone.value,
+                    leadEmail: leadEmail.value,
+                  }));
+                } catch (_) {}
+              });
+            }
+            watch([
+              assets, loanGoal, creditRecord, loanTermMonths, annualInterestRate,
+              applicantType, companyName, companyReg, companyVat,
+              leadFirstName, leadLastName, leadPhone, leadEmail,
+            ], saveDraft, { deep: true });
           });
 
           // ==================== RETURN ====================
           return {
             // Shared
             currentStep,
+
+            // Wizard
+            WIZARD_STEPS, wizardStep, goToWizardStep, nextWizardStep, prevWizardStep,
+            rateOpen, submitState, submitError, referenceId,
+            BUSINESS_WHATSAPP, BUSINESS_PHONE, BUSINESS_NAME,
 
             // Constants
             CATEGORIES, AGE_BRACKETS, CONDITIONS, CREDIT_OPTIONS, TERM_OPTIONS,
@@ -2203,11 +2769,12 @@
             assets,
             creditRecord, loanTermMonths, annualInterestRate, annualInterestRatePct,
             leadFormOpen, leadFirstName, leadLastName, leadPhone, leadEmail, leadErrors, leadSubmitting,
+            applicantType, companyName, companyReg, companyVat, stepFormValid,
             showFinalResult, finalResult,
             addFlash, animatedMaxLoan,
 
             // Computeds
-            draftIsValid, totalMaxLoan,
+            draftIsValid, totalMaxLoan, aggregate,
             progressPct, progressPctLabel, progressFillWidth,
             goalReached, progressMessage, ctaLabel,
             leadFormValid,

@@ -571,13 +571,11 @@
       .sticky-cta-bar .wizard-nav { margin-top: 0; }
 
       .live-summary-strip {
-        position: sticky;
-        bottom: 0;
-        z-index: 9;
-        background: var(--color-surface);
-        border-top: 1px solid var(--color-border);
-        padding: var(--space-3) var(--space-4) calc(var(--space-2) + env(safe-area-inset-bottom));
-        box-shadow: 0 -4px 16px rgba(0,0,0,.06);
+        background: var(--color-primary-soft, #fff4e8);
+        border: 1.5px solid var(--color-primary);
+        border-radius: var(--radius-md);
+        padding: var(--space-3) var(--space-4);
+        margin-top: var(--space-4);
         display: flex;
         align-items: baseline;
         justify-content: space-between;
@@ -717,6 +715,43 @@
         color: var(--color-muted);
         margin: var(--space-1) 0 0;
         line-height: 1.4;
+      }
+
+      .stat-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: var(--space-3);
+        margin-top: var(--space-4);
+        padding-top: var(--space-4);
+        border-top: 1px solid var(--color-border);
+      }
+      .stat {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+      }
+      .stat-label {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: var(--color-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .stat-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--color-ink);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
+      }
+      .stat-value-primary {
+        color: var(--color-primary);
+        font-size: 1.125rem;
+      }
+      @media (max-width: 480px) {
+        .stat-row { grid-template-columns: 1fr; gap: var(--space-3); }
+        .stat { flex-direction: row; align-items: baseline; justify-content: space-between; }
       }
 
       .rate-toggle {
@@ -1751,28 +1786,47 @@
               </div>
 
               <div class="add-field">
-                <button type="button" class="rate-toggle" @click="rateOpen = !rateOpen">
-                  {{ rateOpen ? '− Versteek koers' : '+ Wysig rente koers (' + annualInterestRatePct + '%)' }}
-                </button>
-                <div v-if="rateOpen" style="margin-top: var(--space-3);">
-                  <label class="add-field-label" for="krediet-rate">Jaarlikse rente koers</label>
-                  <div class="add-input-wrapper">
-                    <input
-                      id="krediet-rate"
-                      class="add-input"
-                      type="number"
-                      inputmode="decimal"
-                      step="0.5"
-                      min="0"
-                      max="40"
-                      :value="annualInterestRatePct"
-                      @input="handleRateInput"
-                    >
-                    <span class="add-input-prefix" aria-hidden="true">%</span>
+                <label class="add-field-label" for="krediet-rate">Jaarlikse rente koers</label>
+                <div class="add-input-wrapper">
+                  <input
+                    id="krediet-rate"
+                    class="add-input"
+                    type="number"
+                    inputmode="decimal"
+                    step="0.5"
+                    min="0"
+                    max="40"
+                    :value="annualInterestRatePct"
+                    @input="handleRateInput"
+                  >
+                  <span class="add-input-prefix" aria-hidden="true">%</span>
+                </div>
+                <p class="field-help">Johan onderhandel die finale koers met die bank.</p>
+
+                <div class="stat-row">
+                  <div class="stat">
+                    <span class="stat-label">Leenbedrag</span>
+                    <span class="stat-value">{{ formatZAR(aggregate.max_loan) }}</span>
                   </div>
-                  <p class="field-help">Johan onderhandel die finale koers met die bank.</p>
+                  <div class="stat">
+                    <span class="stat-label">Per maand</span>
+                    <span class="stat-value stat-value-primary">{{ formatZAR(aggregate.monthly_payment) }}</span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">Totale terugbetaling</span>
+                    <span class="stat-value">{{ formatZAR(aggregate.total_repayment) }}</span>
+                  </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Highlight strip above buttons -->
+            <div v-if="assets.length > 0" class="live-summary-strip" aria-live="polite">
+              <span class="live-summary-strip-label">Per maand</span>
+              <span>
+                <span class="live-summary-strip-amount">{{ formatZAR(aggregate.monthly_payment) }}</span>
+                <span class="live-summary-strip-suffix">vir {{ loanTermMonths }} mnd</span>
+              </span>
             </div>
 
             <div class="wizard-nav">
@@ -1780,15 +1834,6 @@
               <button type="button" class="wizard-nav-next" @click="nextWizardStep">Volgende → Kontak</button>
             </div>
           </main>
-
-          <!-- Live repayment sticky strip on Krediet step -->
-          <div v-if="wizardStep === 2 && assets.length > 0" class="live-summary-strip" aria-live="polite">
-            <span class="live-summary-strip-label">Per maand</span>
-            <span>
-              <span class="live-summary-strip-amount">{{ formatZAR(aggregate.monthly_payment) }}</span>
-              <span class="live-summary-strip-suffix">vir {{ loanTermMonths }} mnd</span>
-            </span>
-          </div>
 
           <!-- ===== WIZARD STEP 3: KONTAK ===== -->
           <main v-if="wizardStep === 3" class="calc-main">
@@ -2096,7 +2141,7 @@
             { n: 3, label: 'Kontak' },
           ];
           const wizardStep = ref(1);
-          const rateOpen = ref(false);
+          const rateOpen = ref(true);
           const submitState = ref('idle'); // 'idle' | 'submitting' | 'handoff' | 'error'
           const submitError = ref('');
           const referenceId = ref('');
@@ -2496,15 +2541,29 @@
               ? crypto.randomUUID()
               : 'lead-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
 
+            // Short, human-shareable reference (used by the WhatsApp bot too)
+            const reference = 'BSK-' + Date.now().toString(36).slice(-6).toUpperCase();
+            referenceId.value = reference;
+
+            const handoffMessage =
+              'Hi ' + firstName + ', dis Johan van Boerseker. Ek het jou aansoek (' +
+              reference + ') ontvang — kom ons gesels oor jou ' +
+              formatZAR(aggregate.value.max_loan).replace(/\s/g, ' ') + ' lening.';
+
             const payload = {
               // ----- Flat top-level keys for UChat JSON Path Mapping -----
               // Identity
               crm_contact_id: crmContactId,
+              reference_id: reference,
               name: fullName,
               first_name: firstName,
               last_name: lastName,
               phone: phoneE164,
               email: leadEmail.value.trim(),
+
+              // WhatsApp handoff (for next-phase UChat WhatsApp bot)
+              whatsapp_to: phoneE164,
+              whatsapp_handoff_message: handoffMessage,
 
               // Loan request & result
               loan_goal: loanGoal.value,
@@ -2558,19 +2617,6 @@
             };
 
             finalResult.value = aggregate.value;
-
-            // Generate a short, human-shareable reference: BSK-XXXXXX
-            referenceId.value = 'BSK-' + Date.now().toString(36).slice(-6).toUpperCase();
-            payload.reference_id = referenceId.value;
-
-            // Add the broker WhatsApp + reference into the payload so the next-phase
-            // WhatsApp bot can address the lead by reference and include their numbers.
-            payload.whatsapp_to = phoneE164;
-            payload.whatsapp_handoff_message =
-              'Hi ' + firstName + ', dis Johan van Boerseker. Ek het jou aansoek (' +
-              referenceId.value + ') ontvang — kom ons gesels oor jou ' +
-              formatZAR(aggregate.value.max_loan).replace(/\s/g, ' ') + ' lening.';
-
             submitState.value = 'submitting';
             window.scrollTo({ top: 0, behavior: 'smooth' });
 

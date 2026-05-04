@@ -1584,6 +1584,12 @@
         margin: var(--space-2) 0 0;
         line-height: 1.4;
       }
+      .progress-inline-pct {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--color-muted);
+        font-variant-numeric: tabular-nums;
+      }
       .progress-inline-text.is-reached {
         color: var(--color-success);
         font-weight: 600;
@@ -1766,7 +1772,7 @@
               <button type="button" class="progress-inline-btn" @click="scrollToAddCard"
                       :aria-label="'Vordering: ' + progressPctLabel + ' van ' + formatZAR(loanGoal)">
                 <div class="progress-inline-header">
-                  <span class="progress-inline-current">{{ formatZAR(totalMaxLoan) }}</span>
+                  <span class="progress-inline-current">{{ formatZAR(totalMaxLoan) }} <span class="progress-inline-pct">{{ progressPctLabel }}</span></span>
                   <span class="progress-inline-goal">Doel: {{ formatZAR(loanGoal) }}</span>
                 </div>
                 <div class="progress-track" role="progressbar"
@@ -1816,7 +1822,7 @@
               :disabled="assets.length === 0"
               @click="nextWizardStep"
             >
-              {{ assets.length === 0 ? 'Voeg minstens een bate by' : (goalReached ? '✓ Volgende → Jou krediet' : 'Volgende → Jou krediet') }}
+              {{ assets.length === 0 ? 'Voeg minstens een bate by' : (goalReached ? '✓ Volgende' : 'Volgende') }}
             </button>
           </div>
 
@@ -2059,7 +2065,7 @@
                 <button type="submit"
                         class="wizard-nav-next"
                         :disabled="!stepFormValid || leadSubmitting">
-                  {{ leadSubmitting ? 'Stuur...' : 'Stuur aansoek →' }}
+                  {{ leadSubmitting ? 'Stuur...' : 'Stuur aansoek' }}
                 </button>
               </div>
 

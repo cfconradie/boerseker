@@ -8,6 +8,9 @@
     <title>Herfinansiering Skatting — Boerseker</title>
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
       /* ============================================================
@@ -15,12 +18,18 @@
          ============================================================ */
       :root {
         /* Brand */
-        --color-primary: #a8a836;
-        --color-primary-soft: #f4f4e6;
-        --color-primary-hover: #929228;
-        --color-secondary: #0a4728;
-        --color-success: #16a34a;
-        --color-success-soft: #dcfce7;
+        --color-primary: #0A4728;
+        --color-primary-soft: #e6f1ec;
+        --color-primary-hover: #0B2721;
+        --color-secondary: #0B2721;
+        --color-success: #0A4728;
+        --color-success-soft: #dce9e4;
+        --color-warning: #FBB72A;
+        --color-danger-soft: #fbe7e2;
+        --color-danger-border: #efc2b8;
+        --color-placeholder: #c4c0bb;
+        --color-disabled-text: #a8a29e;
+        --color-facebook: #1877f2;
         --color-neutral: #ffffff;
         --color-black: #000000;
 
@@ -32,7 +41,7 @@
         --color-subtle: #f5f5f4;
         --color-border: #e7e5e4;
         --color-track: #f1efed;
-        --color-danger: #c2410c;
+        --color-danger: #C04327;
 
         /* Spacing */
         --space-1: 4px;
@@ -50,11 +59,11 @@
         --radius-pill: 999px;
 
         /* Typography */
-        --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        --font-stack: "Work Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
         /* Shadows */
         --shadow-card: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
-        --shadow-cta: 0 2px 4px rgba(168,168,54,.15), 0 8px 20px rgba(168,168,54,.20);
+        --shadow-cta: 0 2px 4px rgba(10,71,40,.16), 0 8px 20px rgba(10,71,40,.22);
         --shadow-bar: 0 1px 0 rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
 
         /* Motion */
@@ -145,7 +154,7 @@
       .calc-ai-help summary::-webkit-details-marker { display: none; }
       .calc-ai-help summary:hover {
         border-color: var(--color-primary-hover);
-        background: #ecebcf;
+        background: var(--color-primary-soft);
       }
       .calc-ai-help summary:focus-visible {
         outline: 3px solid var(--color-primary-soft);
@@ -232,7 +241,7 @@
         letter-spacing: 0.02em;
       }
       .calc-input::placeholder {
-        color: #c4c0bb;
+        color: var(--color-placeholder);
         font-weight: 500;
       }
 
@@ -243,7 +252,7 @@
         min-height: 1.2em;
       }
       .calc-helper.is-error {
-        color: #c2410c;
+        color: var(--color-danger);
       }
 
       .calc-result {
@@ -548,8 +557,8 @@
         color: var(--color-neutral);
       }
       .step-dot.is-done .step-dot-circle {
-        background: var(--color-success, #16a34a);
-        color: #fff;
+        background: var(--color-success);
+        color: var(--color-neutral);
       }
       .step-dot-label {
         font-size: 0.6875rem;
@@ -566,7 +575,7 @@
         background: var(--color-track);
         margin-top: -16px;
       }
-      .step-connector.is-done { background: var(--color-success, #16a34a); }
+      .step-connector.is-done { background: var(--color-success); }
 
       .wizard-nav {
         display: flex;
@@ -584,7 +593,7 @@
         font-weight: 600;
         cursor: pointer;
       }
-      .wizard-nav-back:hover { background: var(--color-subtle, #f5f5f4); }
+      .wizard-nav-back:hover { background: var(--color-subtle); }
       .wizard-nav-next {
         flex: 1;
         padding: 18px 22px;
@@ -597,11 +606,11 @@
         font-weight: 700;
         cursor: pointer;
       }
-      .wizard-nav-next:disabled { background: var(--color-track); color: #a8a29e; cursor: not-allowed; }
+      .wizard-nav-next:disabled { background: var(--color-track); color: var(--color-disabled-text); cursor: not-allowed; }
       .wizard-nav-next:hover:not(:disabled) { background: var(--color-primary-hover); }
 
       .step-stub {
-        background: var(--color-subtle, #f5f5f4);
+        background: var(--color-subtle);
         border: 1.5px dashed var(--color-border);
         border-radius: var(--radius-md);
         padding: var(--space-5);
@@ -629,7 +638,7 @@
       .sticky-cta-bar .wizard-nav { margin-top: 0; }
 
       .live-summary-strip {
-        background: var(--color-primary-soft, #fff4e8);
+        background: var(--color-primary-soft);
         border: 1.5px solid var(--color-primary);
         border-radius: var(--radius-md);
         padding: var(--space-3) var(--space-4);
@@ -671,7 +680,7 @@
         width: 72px;
         height: 72px;
         border-radius: 50%;
-        background: var(--color-primary-soft, #fff4e8);
+        background: var(--color-primary-soft);
         color: var(--color-primary);
         font-weight: 700;
         font-size: 1.25rem;
@@ -732,16 +741,16 @@
         border: 0;
       }
       .final-action-whatsapp {
-        background: #25d366;
-        color: #fff;
+        background: var(--color-success);
+        color: var(--color-neutral);
       }
-      .final-action-whatsapp:hover { background: #1ebe5b; }
+      .final-action-whatsapp:hover { background: var(--color-primary-hover); }
       .final-action-call {
         background: var(--color-surface);
         color: var(--color-ink);
         border: 1.5px solid var(--color-border);
       }
-      .final-action-call:hover { background: var(--color-subtle, #f5f5f4); }
+      .final-action-call:hover { background: var(--color-subtle); }
       .final-ref {
         font-size: 0.75rem;
         color: var(--color-muted);
@@ -752,18 +761,18 @@
 
       .submit-error {
         margin-top: var(--space-4);
-        background: #fef2f2;
-        border: 1.5px solid #fecaca;
+        background: var(--color-danger-soft);
+        border: 1.5px solid var(--color-danger-border);
         border-radius: var(--radius-md);
         padding: var(--space-4);
-        color: #991b1b;
+        color: var(--color-danger);
         font-size: 0.875rem;
       }
-      .submit-error strong { color: #7f1d1d; }
+      .submit-error strong { color: var(--color-danger); }
       .submit-error a {
         display: inline-block;
         margin-top: var(--space-2);
-        color: #991b1b;
+        color: var(--color-danger);
         font-weight: 700;
         text-decoration: underline;
       }
@@ -902,7 +911,7 @@
         will-change: width;
       }
       .progress-fill.is-reached {
-        background: linear-gradient(90deg, var(--color-success), #15803d);
+        background: linear-gradient(90deg, var(--color-success), var(--color-primary-hover));
       }
       .top-bar-numbers {
         display: flex;
@@ -1047,7 +1056,7 @@
         letter-spacing: 0.02em;
       }
       .add-input::placeholder {
-        color: #c4c0bb;
+        color: var(--color-placeholder);
         font-weight: 500;
       }
 
@@ -1076,7 +1085,7 @@
       .voeg-by:active:not(:disabled) { transform: translateY(0); }
       .voeg-by:disabled {
         background: var(--color-track);
-        color: #a8a29e;
+        color: var(--color-disabled-text);
         cursor: not-allowed;
         box-shadow: none;
       }
@@ -1258,7 +1267,7 @@
       }
       .cta-bottom:disabled {
         background: var(--color-track);
-        color: #a8a29e;
+        color: var(--color-disabled-text);
         cursor: not-allowed;
         box-shadow: none;
       }
@@ -1266,7 +1275,7 @@
         background: var(--color-success);
       }
       .cta-bottom.is-reached:hover:not(:disabled) {
-        background: #15803d;
+        background: var(--color-primary-hover);
       }
 
       /* Lead form modal */
@@ -1365,7 +1374,7 @@
       .lead-submit:hover:not(:disabled) { background: var(--color-primary-hover); }
       .lead-submit:disabled {
         background: var(--color-track);
-        color: #a8a29e;
+        color: var(--color-disabled-text);
         cursor: not-allowed;
         box-shadow: none;
       }
@@ -1529,6 +1538,56 @@
           transition-duration: 0.001ms !important;
         }
       }
+
+      /* Inline progress bar (below add-card, above asset list) */
+      .progress-inline-wrapper {
+        margin-bottom: var(--space-4);
+      }
+      .progress-inline-btn {
+        width: 100%;
+        background: none;
+        border: 1.5px solid var(--color-border);
+        border-radius: var(--radius-md);
+        padding: var(--space-3) var(--space-4);
+        cursor: pointer;
+        font-family: inherit;
+        text-align: left;
+        transition: background var(--duration-fast) var(--ease-out),
+                    border-color var(--duration-fast) var(--ease-out);
+      }
+      .progress-inline-btn:hover {
+        background: var(--color-subtle);
+        border-color: var(--color-muted);
+      }
+      .progress-inline-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--space-3);
+        margin-bottom: var(--space-2);
+      }
+      .progress-inline-current {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--color-ink);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
+      }
+      .progress-inline-goal {
+        font-size: 0.8125rem;
+        color: var(--color-muted);
+        font-variant-numeric: tabular-nums;
+      }
+      .progress-inline-text {
+        font-size: 0.8125rem;
+        color: var(--color-muted);
+        margin: var(--space-2) 0 0;
+        line-height: 1.4;
+      }
+      .progress-inline-text.is-reached {
+        color: var(--color-success);
+        font-weight: 600;
+      }
     </style>
   </head>
 
@@ -1549,10 +1608,9 @@
               </div>
             </details>
           </div>
-          <p class="calc-subheading">Sit jou bedrag in. Ons wys jou wat dit gaan vat om te kwalifiseer.</p>
 
           <div class="calc-card">
-            <label class="calc-label" for="calc-amount-input">Ek het nodig...</label>
+            <label class="calc-label" for="calc-amount-input">Ek benodig</label>
 
             <div class="calc-input-wrapper">
               <span class="calc-input-prefix" aria-hidden="true">R</span>
@@ -1573,52 +1631,24 @@
 
             <transition name="fade-up">
               <div v-show="isValid" class="calc-result" aria-live="polite">
-                <p class="calc-result-label">Bates wat jy nodig het</p>
+                <p class="calc-result-label">Bates ter waarde van</p>
                 <p class="calc-result-range">{{ formattedLower }} – {{ formattedUpper }}</p>
-                <p class="calc-result-sentence">
-                  Vir <strong>{{ formattedAmount }}</strong> se finansiering moet jou bates tipies iewers in hierdie reeks lê.
-                </p>
+                <p class="calc-result-sentence">kan die lening moontlik maak</p>
               </div>
             </transition>
           </div>
 
-          <transition name="fade-up-slow">
-            <div v-show="showAdvisor" class="advisor">
-              <div class="advisor-header">
-                <div class="advisor-avatar" aria-hidden="true">JV</div>
-                <div class="advisor-meta">
-                  <span class="advisor-name">Johan van der Merwe</span>
-                  <span class="advisor-role">Senior Boerefinansierings Adviseur</span>
-                </div>
+          <transition name="fade-up">
+            <div v-show="isValid" class="advisor">
+              <div class="cta-soft-choice" style="margin-left: 0;">
+                <button class="cta-primary" type="button" @click="goToStep2">
+                  Ek stel belang
+                  <span class="cta-primary-arrow" aria-hidden="true">→</span>
+                </button>
               </div>
-
-              <div class="speech-bubble-wrapper">
-                <transition name="fade-quick" mode="out-in">
-                  <div v-if="!bubbleReady" key="dots" class="typing-dots" aria-label="Adviseur tik 'n boodskap">
-                    <span></span><span></span><span></span>
-                  </div>
-                  <div v-else key="bubble" class="speech-bubble">
-                    Dis net 'n vinnige skatting. Wil jy hê ek moet kyk of jy regtig kan kwalifiseer?
-                  </div>
-                </transition>
-              </div>
-
-              <transition name="fade-up">
-                <div v-show="ctaReady" class="cta-soft-choice">
-                  <button class="cta-primary" type="button" @click="goToStep2">
-                    Ja, kom ons kyk
-                    <span class="cta-primary-arrow" aria-hidden="true">→</span>
-                  </button>
-                </div>
-              </transition>
-
-              <transition name="fade-up">
-                <div v-show="ctaReady" class="trust-chips">
-                  <span class="trust-chip"><span class="trust-chip-icon">🔒</span> Nog geen kredietkontrole</span>
-                  <span class="trust-chip"><span class="trust-chip-icon">⏱</span> Regte adviseur antwoord binne 2 uur</span>
-                  <span class="trust-chip"><span class="trust-chip-icon">🇿🇦</span> NCR Geregistreer</span>
-                </div>
-              </transition>
+              <p style="margin-top: var(--space-3); font-size: 0.8125rem; color: var(--color-muted);">
+                <a href="#terms" style="color: inherit; text-decoration: underline; text-underline-offset: 2px;">Terme en voorwaardes</a>
+              </p>
             </div>
           </transition>
 
@@ -1652,36 +1682,17 @@
             </div>
           </div>
 
-          <!-- Top progress bar (only on Bates step) -->
-          <header v-if="wizardStep === 1" class="top-bar" role="status" aria-live="polite">
-            <div class="top-bar-header">
-              <span class="top-bar-label">Vordering na jou doel</span>
-              <span class="top-bar-percent" :class="{ 'is-reached': goalReached }">{{ progressPctLabel }}</span>
-            </div>
-
-            <div class="progress-track" :aria-valuenow="Math.round(progressPct)" aria-valuemin="0" aria-valuemax="100" role="progressbar">
-              <div class="progress-fill" :class="{ 'is-reached': goalReached }" :style="{ width: progressFillWidth }"></div>
-            </div>
-
-            <div class="top-bar-numbers">
-              <span class="top-bar-current">{{ formatZAR(animatedMaxLoan) }}</span>
-              <span class="top-bar-goal">van {{ formatZAR(loanGoal) }}</span>
-            </div>
-
-            <p class="top-bar-message" :class="{ 'is-reached': goalReached }">{{ progressMessage }}</p>
-            <a class="top-bar-edit" href="#" @click.prevent="currentStep = 1">← Wysig bedrag</a>
-          </header>
 
           <!-- ===== WIZARD STEP 1: BATES ===== -->
           <main v-if="wizardStep === 1" class="calc-main">
 
             <section>
-              <h2 class="section-heading">Wat besit jy?</h2>
+              <h2 class="section-heading">Afbetaalde bates waarteen jy wil leen</h2>
 
               <div class="add-card">
 
                 <div class="add-field">
-                  <label class="add-field-label">Wat is dit?</label>
+                  <label class="add-field-label">Kies jou bate</label>
                   <div class="chip-group" role="radiogroup" aria-label="Bate kategorie">
                     <button v-for="cat in CATEGORIES" :key="cat.id"
                             type="button"
@@ -1696,7 +1707,7 @@
                 </div>
 
                 <div class="add-field">
-                  <label class="add-field-label" for="draft-value">Hoeveel is dit werd?</label>
+                  <label class="add-field-label" for="draft-value">Huidige mark waarde</label>
                   <div class="add-input-wrapper">
                     <span class="add-input-prefix" aria-hidden="true">R</span>
                     <input
@@ -1714,7 +1725,7 @@
                 </div>
 
                 <div class="add-field">
-                  <label class="add-field-label">Hoe oud is dit?</label>
+                  <label class="add-field-label">Jaar beskrywing</label>
                   <div class="chip-group" role="radiogroup" aria-label="Ouderdom">
                     <button v-for="age in AGE_BRACKETS" :key="age.id"
                             type="button"
@@ -1728,7 +1739,7 @@
                 </div>
 
                 <div class="add-field">
-                  <label class="add-field-label">Hoe lyk dit?</label>
+                  <label class="add-field-label">Toestand van bate</label>
                   <div class="chip-group" role="radiogroup" aria-label="Toestand">
                     <button v-for="cond in CONDITIONS" :key="cond.id"
                             type="button"
@@ -1747,9 +1758,25 @@
                   :class="{ 'is-flash': addFlash }"
                   :disabled="!draftIsValid"
                   @click="addAsset"
-                >{{ draftIsValid ? '✓ Voeg by jou bates' : 'Vul die 4 velde in' }}</button>
+                >{{ draftIsValid ? '✓ Dien in' : 'Vul die 4 velde in' }}</button>
               </div>
             </section>
+
+            <div v-if="assets.length > 0" class="progress-inline-wrapper" role="status" aria-live="polite">
+              <button type="button" class="progress-inline-btn" @click="scrollToAddCard"
+                      :aria-label="'Vordering: ' + progressPctLabel + ' van ' + formatZAR(loanGoal)">
+                <div class="progress-inline-header">
+                  <span class="progress-inline-current">{{ formatZAR(totalMaxLoan) }}</span>
+                  <span class="progress-inline-goal">Doel: {{ formatZAR(loanGoal) }}</span>
+                </div>
+                <div class="progress-track" role="progressbar"
+                     :aria-valuenow="Math.round(progressPct)" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-fill"
+                       :style="{ width: progressFillWidth, background: progressBarColor }"></div>
+                </div>
+                <p class="progress-inline-text" :class="{ 'is-reached': goalReached }">{{ progressMessage }}</p>
+              </button>
+            </div>
 
             <section class="list-section">
               <h2 class="section-heading">Jou bates ({{ assets.length }})</h2>
@@ -1795,7 +1822,7 @@
 
           <!-- ===== WIZARD STEP 2: KREDIET ===== -->
           <main v-if="wizardStep === 2" class="calc-main">
-            <h2 class="section-heading">Jou krediet</h2>
+            <h2 class="section-heading">Hoe wil jy leen</h2>
 
             <div class="add-card">
 
@@ -1822,7 +1849,7 @@
               </div>
 
               <div class="add-field">
-                <label class="add-field-label">Krediet rekord</label>
+                <label class="add-field-label">Krediet status</label>
                 <div class="chip-group">
                   <button v-for="cr in CREDIT_OPTIONS" :key="cr.id"
                           type="button"
@@ -1834,8 +1861,35 @@
                   </button>
                 </div>
                 <p class="field-help">
-                  Goed = geen versuimings · Gemiddeld = 1–2 · Swak = 3+ of tans agterstallig
+                  Uitstekend = geen versuimings · Goed = 1–2 · Het werk nodig = 3+ of tans agterstallig
                 </p>
+              </div>
+
+              <div class="add-field">
+                <label class="add-field-label">Betalingswyse</label>
+                <div class="chip-group" role="radiogroup" aria-label="Betalingswyse">
+                  <button type="button"
+                          class="chip"
+                          :class="{ 'is-active': paymentFrequency === 'monthly' }"
+                          :aria-pressed="paymentFrequency === 'monthly'"
+                          @click="paymentFrequency = 'monthly'">
+                    Maandeliks
+                  </button>
+                  <button type="button"
+                          class="chip"
+                          :class="{ 'is-active': paymentFrequency === 'biannual' }"
+                          :aria-pressed="paymentFrequency === 'biannual'"
+                          @click="paymentFrequency = 'biannual'">
+                    Halfjaarliks
+                  </button>
+                  <button type="button"
+                          class="chip"
+                          :class="{ 'is-active': paymentFrequency === 'annual' }"
+                          :aria-pressed="paymentFrequency === 'annual'"
+                          @click="paymentFrequency = 'annual'">
+                    Jaarliks
+                  </button>
+                </div>
               </div>
 
               <div class="add-field">
@@ -1868,7 +1922,7 @@
                   >
                   <span class="add-input-prefix" aria-hidden="true">%</span>
                 </div>
-                <p class="field-help">Johan onderhandel die finale koers met die bank.</p>
+                <p class="field-help">Die koers is onderhewig aan 'n assessering van jou kredietrekord en betalings-vermoë.</p>
 
                 <div class="stat-row">
                   <div class="stat">
@@ -1876,8 +1930,8 @@
                     <span class="stat-value">{{ formatZAR(aggregate.max_loan) }}</span>
                   </div>
                   <div class="stat">
-                    <span class="stat-label">Per maand</span>
-                    <span class="stat-value stat-value-primary">{{ formatZAR(aggregate.monthly_payment) }}</span>
+                    <span class="stat-label">{{ displayPaymentLabel }}</span>
+                    <span class="stat-value stat-value-primary">{{ formatZAR(displayPayment) }}</span>
                   </div>
                   <div class="stat">
                     <span class="stat-label">Totale terugbetaling</span>
@@ -1889,16 +1943,16 @@
 
             <!-- Highlight strip above buttons -->
             <div v-if="assets.length > 0" class="live-summary-strip" aria-live="polite">
-              <span class="live-summary-strip-label">Per maand</span>
+              <span class="live-summary-strip-label">{{ displayPaymentLabel }}</span>
               <span>
-                <span class="live-summary-strip-amount">{{ formatZAR(aggregate.monthly_payment) }}</span>
+                <span class="live-summary-strip-amount">{{ formatZAR(displayPayment) }}</span>
                 <span class="live-summary-strip-suffix">vir {{ loanTermMonths }} mnd</span>
               </span>
             </div>
 
             <div class="wizard-nav">
               <button type="button" class="wizard-nav-back" @click="prevWizardStep">← Terug</button>
-              <button type="button" class="wizard-nav-next" @click="nextWizardStep">Volgende → Kontak</button>
+              <button type="button" class="wizard-nav-next" @click="nextWizardStep">Volgende</button>
             </div>
           </main>
 
@@ -1976,7 +2030,7 @@
                        type="tel"
                        inputmode="tel"
                        autocomplete="tel"
-                       placeholder="082 123 4567"
+                       placeholder="082"
                        v-model="leadPhone"
                        @blur="validateLeadField('phone')">
                 <p class="lead-form-error">{{ leadErrors.phone || '' }}</p>
@@ -1997,7 +2051,7 @@
               </div>
 
               <p class="field-help" style="margin-top: var(--space-3);">
-                Johan stuur 'n WhatsApp na <strong>{{ leadPhone || 'jou nommer' }}</strong> sodra ons jou aansoek ontvang.
+                Boerseker maak binnekort kontak met jou.
               </p>
 
               <div class="wizard-nav">
@@ -2005,14 +2059,14 @@
                 <button type="submit"
                         class="wizard-nav-next"
                         :disabled="!stepFormValid || leadSubmitting">
-                  {{ leadSubmitting ? 'Stuur...' : 'Laat Johan weet →' }}
+                  {{ leadSubmitting ? 'Stuur...' : 'Stuur aansoek →' }}
                 </button>
               </div>
 
               <div v-if="submitState === 'error'" class="submit-error" role="alert">
                 <strong>Hmm —</strong> {{ submitError }}
                 <br>
-                <a :href="'https://wa.me/' + BUSINESS_WHATSAPP">💬 WhatsApp Johan direk</a>
+                <a :href="'https://wa.me/' + BUSINESS_WHATSAPP">💬 WhatsApp Boerseker</a>
               </div>
             </form>
           </main>
@@ -2023,10 +2077,8 @@
       <!-- ==================== HANDOFF (between submit and success) ==================== -->
       <transition name="final" appear>
         <section v-if="submitState === 'handoff'" class="handoff" aria-live="polite">
-          <div class="handoff-avatar" aria-hidden="true">JV</div>
           <div class="handoff-bubble">
-            Ek het jou aansoek ontvang, <strong>{{ leadFirstName }}</strong>.
-            Ek kyk gou na die syfers
+            Verwag 'n WhatsApp boodskap vanaf Boerseker binnekort, om met die proses te begin.
             <span class="handoff-typing" aria-hidden="true"><span></span><span></span><span></span></span>
           </div>
         </section>
@@ -2042,8 +2094,8 @@
           <p class="final-amount">{{ formatZAR(finalResult.max_loan) }}</p>
 
           <dl class="final-details">
-            <dt>Per maand</dt>
-            <dd>{{ formatZAR(finalResult.monthly_payment) }}</dd>
+            <dt>{{ displayPaymentLabel }}</dt>
+            <dd>{{ formatZAR(finalDisplayPayment) }}</dd>
             <dt>Oor</dt>
             <dd>{{ loanTermMonths }} maande</dd>
             <dt>Totale terugbetaling</dt>
@@ -2051,19 +2103,15 @@
           </dl>
 
           <p class="final-promise">
-            Johan stuur jou nou 'n <strong>WhatsApp</strong> op
-            <strong>{{ leadPhone }}</strong>. Hou jou foon byderhand.
+            Verwag 'n WhatsApp boodskap vanaf Boerseker binnekort, om met die proses te begin.
           </p>
 
           <div class="final-actions">
-            <a class="final-action final-action-whatsapp"
-               :href="'https://wa.me/' + BUSINESS_WHATSAPP + '?text=' + encodeURIComponent('Hi Johan, my verwysing is ' + referenceId + '. Kan ons gesels?')"
-               target="_blank" rel="noopener">
-              💬 Open WhatsApp met Johan
-            </a>
-            <a class="final-action final-action-call"
-               :href="'tel:' + BUSINESS_PHONE">
-              📞 Bel Johan ({{ BUSINESS_PHONE }})
+            <a class="final-action"
+               href="#facebook"
+               target="_blank" rel="noopener"
+               style="background: var(--color-facebook); color: var(--color-neutral);">
+              Volg ons op Facebook vir meer inligting rakende finansiering
             </a>
           </div>
 
@@ -2103,9 +2151,9 @@
       ];
 
       const CREDIT_OPTIONS = [
-        { id: 'good',   label: 'Goed'  },
-        { id: 'medium', label: 'Gemiddeld' },
-        { id: 'weak',   label: 'Swak'  },
+        { id: 'good',   label: 'Uitstekend'     },
+        { id: 'medium', label: 'Goed'            },
+        { id: 'weak',   label: 'Het werk nodig'  },
       ];
 
       const TERM_OPTIONS = [24, 36, 48, 60];
@@ -2238,10 +2286,6 @@
           // ==================== STEP 1 STATE ====================
           const desiredAmount = ref(null);
           const displayAmount = ref('');
-          const showAdvisor   = ref(false);
-          const bubbleReady   = ref(false);
-          const ctaReady      = ref(false);
-          let revealStarted   = false;
 
           // ==================== STEP 2 STATE ====================
           const loanGoal = ref(500000);
@@ -2258,6 +2302,7 @@
           const creditRecord       = ref('good');
           const loanTermMonths     = ref(60);
           const annualInterestRate = ref(0.18);
+          const paymentFrequency   = ref('monthly'); // 'monthly' | 'biannual' | 'annual'
 
           const leadFormOpen   = ref(false);
           const leadFirstName  = ref('');
@@ -2354,6 +2399,34 @@
           const annualInterestRatePct = computed(() =>
             (annualInterestRate.value * 100).toFixed(1).replace(/\.0$/, '')
           );
+
+          const progressBarColor = computed(() => {
+            const pct = progressPct.value;
+            if (pct >= 80) return 'var(--color-success)';
+            if (pct >= 50) return 'var(--color-warning)';
+            return 'var(--color-danger)';
+          });
+
+          const displayPaymentLabel = computed(() => {
+            if (paymentFrequency.value === 'biannual') return 'Per halfjaar';
+            if (paymentFrequency.value === 'annual')   return 'Per jaar';
+            return 'Per maand';
+          });
+
+          const displayPayment = computed(() => {
+            const mp = aggregate.value.monthly_payment;
+            if (paymentFrequency.value === 'biannual') return mp * 6;
+            if (paymentFrequency.value === 'annual')   return mp * 12;
+            return mp;
+          });
+
+          const finalDisplayPayment = computed(() => {
+            if (!finalResult.value) return 0;
+            const mp = finalResult.value.monthly_payment;
+            if (paymentFrequency.value === 'biannual') return mp * 6;
+            if (paymentFrequency.value === 'annual')   return mp * 12;
+            return mp;
+          });
 
           const stepFormValid = computed(() =>
             isValidName(leadFirstName.value)
@@ -2481,8 +2554,9 @@
             currentStep.value = 2;
           }
 
-          function handleGhostClick() {
-            console.log('[Boerseker] Ghost CTA clicked — "I\'m just browsing"');
+          function scrollToAddCard() {
+            const el = document.querySelector('.add-card');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
 
           // ==================== ASSET CRUD ====================
@@ -2613,7 +2687,7 @@
             referenceId.value = reference;
 
             const handoffMessage =
-              'Hi ' + firstName + ', dis Johan van Boerseker. Ek het jou aansoek (' +
+              'Hi ' + firstName + ', dis Boerseker. Ek het jou aansoek (' +
               reference + ') ontvang — kom ons gesels oor jou ' +
               formatZAR(aggregate.value.max_loan).replace(/\s/g, ' ') + ' lening.';
 
@@ -2703,7 +2777,7 @@
             if (!crmOk) {
               leadSubmitting.value = false;
               submitState.value = 'error';
-              submitError.value = 'Ons kon nie nou jou aansoek stuur nie. Bel of WhatsApp Johan direk — ons het jou inligting nog by die hand.';
+              submitError.value = 'Ons kon nie nou jou aansoek stuur nie. WhatsApp Boerseker direk — ons het jou inligting nog by die hand.';
               return;
             }
 
@@ -2731,30 +2805,7 @@
 
           // ==================== WATCHERS ====================
 
-          // Step 1: reveal sequence (animated on first valid, instant on repeat)
-          watch(isValid, (valid) => {
-            if (!valid) {
-              // Input cleared — reset to clean state
-              showAdvisor.value = false;
-              bubbleReady.value = false;
-              ctaReady.value = false;
-              return;
-            }
-            if (revealStarted) {
-              // Already seen the animation — show instantly
-              showAdvisor.value = true;
-              bubbleReady.value = true;
-              ctaReady.value = true;
-              return;
-            }
-            // First time — play the animation sequence
-            revealStarted = true;
-            setTimeout(() => { showAdvisor.value = true;  }, 380);
-            setTimeout(() => { bubbleReady.value = true;  }, 1180);
-            setTimeout(() => { ctaReady.value = true;     }, 1380);
-          });
-
-          // Step 2: animated counter on top bar
+          // Step 2: animated counter
           let counterRaf = null;
           watch(totalMaxLoan, (newVal) => {
             if (counterRaf) cancelAnimationFrame(counterRaf);
@@ -2789,10 +2840,6 @@
                 displayAmount.value = parsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
                 loanGoal.value = parsed;
                 currentStep.value = 2;
-                revealStarted = true;
-                showAdvisor.value = true;
-                bubbleReady.value = true;
-                ctaReady.value = true;
               }
             }
 
@@ -2814,6 +2861,7 @@
                 if (typeof d.creditRecord === 'string')      creditRecord.value = d.creditRecord;
                 if (typeof d.loanTermMonths === 'number')    loanTermMonths.value = d.loanTermMonths;
                 if (typeof d.annualInterestRate === 'number') annualInterestRate.value = d.annualInterestRate;
+                if (typeof d.paymentFrequency === 'string')  paymentFrequency.value = d.paymentFrequency;
                 if (typeof d.applicantType === 'string')     applicantType.value = d.applicantType;
                 if (typeof d.companyName === 'string')       companyName.value = d.companyName;
                 if (typeof d.companyReg === 'string')        companyReg.value = d.companyReg;
@@ -2839,6 +2887,7 @@
                     creditRecord: creditRecord.value,
                     loanTermMonths: loanTermMonths.value,
                     annualInterestRate: annualInterestRate.value,
+                    paymentFrequency: paymentFrequency.value,
                     applicantType: applicantType.value,
                     companyName: companyName.value,
                     companyReg: companyReg.value,
@@ -2852,7 +2901,7 @@
               });
             }
             watch([
-              assets, loanGoal, creditRecord, loanTermMonths, annualInterestRate,
+              assets, loanGoal, creditRecord, loanTermMonths, annualInterestRate, paymentFrequency,
               applicantType, companyName, companyReg, companyVat,
               leadFirstName, leadLastName, leadPhone, leadEmail,
             ], saveDraft, { deep: true });
@@ -2872,7 +2921,7 @@
             CATEGORIES, AGE_BRACKETS, CONDITIONS, CREDIT_OPTIONS, TERM_OPTIONS,
 
             // Step 1
-            displayAmount, isValid, showAdvisor, bubbleReady, ctaReady,
+            displayAmount, isValid,
             formattedLower, formattedUpper, formattedAmount,
             helperText, helperIsError,
 
@@ -2881,6 +2930,7 @@
             draftCategory, draftValue, draftValueDisplay, draftAge, draftCondition,
             assets,
             creditRecord, loanTermMonths, annualInterestRate, annualInterestRatePct,
+            paymentFrequency,
             leadFormOpen, leadFirstName, leadLastName, leadPhone, leadEmail, leadErrors, leadSubmitting,
             applicantType, companyName, companyReg, companyVat, stepFormValid,
             showFinalResult, finalResult,
@@ -2889,6 +2939,7 @@
             // Computeds
             draftIsValid, totalMaxLoan, aggregate,
             progressPct, progressPctLabel, progressFillWidth,
+            progressBarColor, displayPayment, displayPaymentLabel, finalDisplayPayment,
             goalReached, progressMessage, ctaLabel,
             leadFormValid,
 
@@ -2896,7 +2947,7 @@
             formatZAR,
             getCategory, getAge, getCondition, getAssetContribution,
             handleInput, handleValueInput, handleRateInput,
-            goToStep2, handleGhostClick,
+            goToStep2, scrollToAddCard,
             addAsset, removeAsset,
             openLeadForm, closeLeadForm, submitLead,
             validateLeadField,

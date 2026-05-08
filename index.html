@@ -2754,12 +2754,34 @@
             submitState.value = 'submitting';
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
+            // Generate PDF first so pdf_url can be included in the CRM payload.
+            pdfUrl.value = null;
+            let generatedPdfUrl = null;
+            try {
+              const pdfResp = await fetch(PDF_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${PDF_SECRET}` },
+                body: JSON.stringify(payload),
+              });
+              if (pdfResp.ok) {
+                const pdfJson = await pdfResp.json();
+                if (pdfJson && pdfJson.pdf_url) {
+                  generatedPdfUrl = pdfJson.pdf_url;
+                  pdfUrl.value = generatedPdfUrl;
+                }
+              }
+            } catch (err) {
+              console.warn('[Boerseker] PDF generation failed:', err);
+            }
+
+            // Send CRM with pdf_url included so Boerseker can view and print.
+            const crmPayload = generatedPdfUrl ? { ...payload, pdf_url: generatedPdfUrl } : payload;
             let crmOk = false;
             try {
               const resp = await fetch(CRM_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
+                body: JSON.stringify(crmPayload),
               });
               crmOk = resp.ok;
               if (!resp.ok) console.warn('[Boerseker] CRM responded', resp.status);
@@ -2773,16 +2795,6 @@
               submitError.value = 'Ons kon nie nou jou aansoek stuur nie. WhatsApp Boerseker direk — ons het jou inligting nog by die hand.';
               return;
             }
-
-            // Fire PDF generation in background — don't block the final screen.
-            pdfUrl.value = null;
-            fetch(PDF_ENDPOINT, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${PDF_SECRET}` },
-              body: JSON.stringify(payload),
-            }).then(r => r.ok ? r.json() : null)
-              .then(j => { if (j && j.pdf_url) pdfUrl.value = j.pdf_url; })
-              .catch(() => {});
 
             // Show the Johan handoff bubble for ~2.4s, then the final screen.
             submitState.value = 'handoff';

@@ -751,6 +751,24 @@
         border: 1.5px solid var(--color-border);
       }
       .final-action-call:hover { background: var(--color-subtle); }
+      .final-action-pdf {
+        background: var(--color-primary);
+        color: var(--color-neutral);
+      }
+      .final-action-pdf:hover { background: var(--color-primary-hover); }
+      .final-action-pdf-loading {
+        background: transparent;
+        color: var(--color-muted);
+        border: 1.5px dashed var(--color-border);
+        cursor: default;
+        pointer-events: none;
+      }
+      .final-action-facebook {
+        background: #1877f2;
+        color: #fff;
+        gap: 10px;
+      }
+      .final-action-facebook:hover { background: #166fe5; }
       .final-ref {
         font-size: 0.75rem;
         color: var(--color-muted);
@@ -2113,11 +2131,23 @@
           </p>
 
           <div class="final-actions">
-            <a class="final-action"
-               href="#facebook"
+            <a v-if="pdfUrl"
+               class="final-action final-action-pdf"
+               :href="pdfUrl"
                target="_blank" rel="noopener"
-               style="background: var(--color-facebook); color: var(--color-neutral);">
-              Volg ons op Facebook vir meer inligting rakende finansiering
+               download>
+              ↓ Laai jou finansieringsverslag af
+            </a>
+            <span v-else class="final-action final-action-pdf-loading">
+              Verslag word gegenereer…
+            </span>
+            <a class="final-action final-action-facebook"
+               href="#facebook"
+               target="_blank" rel="noopener">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+              Volg ons op Facebook
             </a>
           </div>
 
@@ -2165,6 +2195,8 @@
       const TERM_OPTIONS = [24, 36, 48, 60];
 
       const CRM_ENDPOINT = 'https://www.uchat.com.au/api/iwh/ef2327b168a3136bb8ac5cdf8f967af3';
+      const PDF_ENDPOINT = 'https://boerseker.vercel.app/api/pdf';
+      const PDF_SECRET   = 'boerseker-pdf-2026';
 
       // Boerseker broker contact (for fallback CTAs on final screen).
       // Replace these with real production numbers before launch.
@@ -2324,6 +2356,7 @@
 
           const showFinalResult = ref(false);
           const finalResult     = ref(null);
+          const pdfUrl          = ref(null);
 
           const addFlash        = ref(false);
           const animatedMaxLoan = ref(0);
@@ -2635,18 +2668,6 @@
               collateral_value: Math.round(calcCollateral(a)),
             }));
 
-            const assetsSummary = assetsList
-              .map(a => `${a.category} (R${a.market_value.toLocaleString()})`)
-              .join('; ');
-
-            // Unique list of asset categories + the single biggest-contributing category
-            const uniqueCategories = [...new Set(assetsList.map(a => a.category))];
-            const assetCategoriesCsv = uniqueCategories.join(',');
-            const topAsset = assetsList
-              .slice()
-              .sort((a, b) => b.collateral_value - a.collateral_value)[0];
-            const topAssetCategory = topAsset ? topAsset.category : '';
-
             // Goal maths for agent scripting
             const goalDelta    = aggregate.value.max_loan - loanGoal.value;
             const loanShortfall = goalDelta < 0 ? Math.abs(goalDelta) : 0;
@@ -2667,15 +2688,11 @@
               leadScore = 'warm';
             }
 
-            // Attribution: UTMs, referrer, landing URL
-            const urlParams = new URLSearchParams(window.location.search);
+            // Attribution: UTMs
+            const urlParams   = new URLSearchParams(window.location.search);
             const utmSource   = urlParams.get('utm_source')   || '';
             const utmMedium   = urlParams.get('utm_medium')   || '';
             const utmCampaign = urlParams.get('utm_campaign') || '';
-            const utmContent  = urlParams.get('utm_content')  || '';
-            const utmTerm     = urlParams.get('utm_term')     || '';
-            const pageUrl     = window.location.href;
-            const referrer    = document.referrer || '';
 
             // Device heuristic
             const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -2692,75 +2709,45 @@
             const reference = 'BSK-' + Date.now().toString(36).slice(-6).toUpperCase();
             referenceId.value = reference;
 
-            const handoffMessage =
-              'Hi ' + firstName + ', dis Boerseker. Ek het jou aansoek (' +
-              reference + ') ontvang — kom ons gesels oor jou ' +
-              formatZAR(aggregate.value.max_loan).replace(/\s/g, ' ') + ' lening.';
-
             const payload = {
-              // ----- Flat top-level keys for UChat JSON Path Mapping -----
-              // Identity
-              crm_contact_id: crmContactId,
+              // --- Tier 1: Bank / PDF fields ---
               reference_id: reference,
+              submitted_at: new Date().toISOString(),
+
               name: fullName,
               first_name: firstName,
               last_name: lastName,
               phone: phoneE164,
               email: leadEmail.value.trim(),
+              applicant_type: applicantType.value,
+              company_name: companyName.value.trim(),
+              company_reg: companyReg.value.trim(),
+              company_vat: companyVat.value.trim(),
 
-              // WhatsApp handoff (for next-phase UChat WhatsApp bot)
-              whatsapp_to: phoneE164,
-              whatsapp_handoff_message: handoffMessage,
-
-              // Loan request & result
               loan_goal: loanGoal.value,
-              step1_amount: loanGoal.value,
               max_loan: aggregate.value.max_loan,
+              loan_term_months: loanTermMonths.value,
+              annual_interest_rate: annualInterestRate.value,
+              credit_record: creditRecord.value,
               monthly_payment: aggregate.value.monthly_payment,
               total_repayment: aggregate.value.total_repayment,
               total_finance_cost: aggregate.value.total_finance_cost,
               total_collateral: aggregate.value.total_collateral,
               loan_shortfall: loanShortfall,
               loan_surplus: loanSurplus,
-              progress_pct: progressPctRounded,
               goal_reached: goalReached.value,
+              progress_pct: progressPctRounded,
+
+              assets: assetsList,
+
+              // --- Tier 2: Internal / uChat routing ---
+              crm_contact_id: crmContactId,
+              whatsapp_to: phoneE164,
               lead_score: leadScore,
-
-              // Application inputs
-              applicant_type: applicantType.value,
-              company_name: companyName.value.trim(),
-              company_reg: companyReg.value.trim(),
-              company_vat: companyVat.value.trim(),
-              credit_record: creditRecord.value,
-              loan_term_months: loanTermMonths.value,
-              annual_interest_rate: annualInterestRate.value,
-
-              // Assets
-              assets_count: assetsList.length,
-              assets_summary: assetsSummary,
-              asset_categories: assetCategoriesCsv,
-              top_asset_category: topAssetCategory,
-
-              // Attribution / context
-              source: 'complex-calc',
-              page_url: pageUrl,
-              referrer: referrer,
               utm_source: utmSource,
               utm_medium: utmMedium,
               utm_campaign: utmCampaign,
-              utm_content: utmContent,
-              utm_term: utmTerm,
               device: device,
-              submitted_at: new Date().toISOString(),
-
-              // ----- Full nested structure kept for debugging / future use -----
-              assets: assetsList,
-              application: {
-                credit_record: creditRecord.value,
-                loan_term_months: loanTermMonths.value,
-                annual_interest_rate: annualInterestRate.value,
-              },
-              result: aggregate.value,
             };
 
             finalResult.value = aggregate.value;
@@ -2786,6 +2773,16 @@
               submitError.value = 'Ons kon nie nou jou aansoek stuur nie. WhatsApp Boerseker direk — ons het jou inligting nog by die hand.';
               return;
             }
+
+            // Fire PDF generation in background — don't block the final screen.
+            pdfUrl.value = null;
+            fetch(PDF_ENDPOINT, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${PDF_SECRET}` },
+              body: JSON.stringify(payload),
+            }).then(r => r.ok ? r.json() : null)
+              .then(j => { if (j && j.pdf_url) pdfUrl.value = j.pdf_url; })
+              .catch(() => {});
 
             // Show the Johan handoff bubble for ~2.4s, then the final screen.
             submitState.value = 'handoff';
@@ -2939,7 +2936,7 @@
             paymentFrequency,
             leadFormOpen, leadFirstName, leadLastName, leadPhone, leadEmail, leadErrors, leadSubmitting,
             applicantType, companyName, companyReg, companyVat, stepFormValid,
-            showFinalResult, finalResult,
+            showFinalResult, finalResult, pdfUrl,
             addFlash, animatedMaxLoan,
 
             // Computeds

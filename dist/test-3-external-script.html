@@ -1,0 +1,7 @@
+<div id="t3">TEST 3 — eksterne script tag (unpkg).</div>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script>
+document.getElementById('t3').textContent = typeof Vue !== 'undefined'
+  ? 'TEST 3 ✓ eksterne script werk — Vue gelaai'
+  : 'TEST 3 ✗ Vue NIE gelaai';
+</script>

@@ -38,7 +38,28 @@ const minifiedCss = (await minify(`<style>${rawCss}</style>`, {
   removeComments: true,
 })).replace(/^<style>|<\/style>$/g, '');
 
-const htmlWithoutCss = html.replace(/<style>[\s\S]*?<\/style>/, '');
+// For Simvoly: full DOCTYPE+wrapper IS needed (removing it broke things).
+// But the inline <script> block (~30KB of JS) is the most likely sanitizer trigger.
+// Externalize it to dist/app.js so the widget itself contains only:
+//   - DOCTYPE + html/head/body wrapper
+//   - <script src="...vue..."></script>
+//   - HTML body
+//   - <script src="https://boerseker.vercel.app/app.js"></script>
+let htmlWithoutCss = html.replace(/<style>[\s\S]*?<\/style>/, '');
+
+// Find the LAST <script>...</script> block (the inline app code; not the Vue CDN one)
+const scriptBlocks = [...htmlWithoutCss.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)];
+if (scriptBlocks.length > 0) {
+  const lastInline = scriptBlocks[scriptBlocks.length - 1];
+  const appJs = lastInline[1];
+  await writeFile(resolve(outputDir, 'app.js'), appJs, 'utf8');
+  // Replace the inline script with an external one pointing at our deployed app.js
+  htmlWithoutCss =
+    htmlWithoutCss.slice(0, lastInline.index)
+    + '<script src="https://boerseker.vercel.app/app.js"></script>'
+    + htmlWithoutCss.slice(lastInline.index + lastInline[0].length);
+}
+
 const minifiedHtmlNoCss = await minify(htmlWithoutCss, {
   collapseWhitespace: true,
   conservativeCollapse: true,

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="af-ZA">
+<head>
+<meta charset="UTF-8">
+<title>Local smoke test — boerseker embed</title>
+</head>
+<body>
+<h1 style="font-family:sans-serif;color:#888">Boerseker embed local smoke test</h1>
+<div id="boerseker-app"></div>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script>
+// Patch the CDN URL inside embed.js content for local testing.
+// Easiest: just inject local CSS first, then load embed.js but tell it to skip its own CSS inject.
+var l = document.createElement('link'); l.rel='stylesheet'; l.id='boerseker-style'; l.href='./style.css'; document.head.appendChild(l);
+</script>
+<script src="./embed.js"></script>
+</body>
+</html>

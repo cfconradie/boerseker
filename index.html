@@ -2296,10 +2296,28 @@
           const submitState = ref('idle'); // 'idle' | 'submitting' | 'handoff' | 'error'
           const submitError = ref('');
           const referenceId = ref('');
+          function scrollCalcToTop() {
+            // Two reasons to defer + run twice:
+            //  1. Vue must re-render the new wizard step before we measure.
+            //  2. CloudFunnels/Simvoly sometimes runs its own scroll handler
+            //     (sticky header / analytics) that fights smooth-scroll mid-flight.
+            //  Using behavior:'auto' (instant) survives that, then a second pass
+            //  after one frame catches any layout shift.
+            nextTick(() => {
+              const el = document.getElementById('boerseker-app');
+              if (!el) return;
+              const doScroll = () => {
+                const rect = el.getBoundingClientRect();
+                window.scrollTo({ top: window.scrollY + rect.top - 16, behavior: 'auto' });
+              };
+              doScroll();
+              requestAnimationFrame(doScroll);
+            });
+          }
           function goToWizardStep(n) {
             if (n < 1 || n > WIZARD_STEPS.length) return;
             wizardStep.value = n;
-            (document.getElementById('boerseker-app') || document.body).scrollIntoView({ behavior: 'smooth', block: 'start' });
+            scrollCalcToTop();
           }
           function nextWizardStep() {
             if (wizardStep.value === 1 && assets.value.length === 0) return;
@@ -2750,7 +2768,7 @@
 
             finalResult.value = aggregate.value;
             submitState.value = 'submitting';
-            (document.getElementById('boerseker-app') || document.body).scrollIntoView({ behavior: 'smooth', block: 'start' });
+            scrollCalcToTop();
 
             // Generate PDF first so pdf_url can be included in the CRM payload.
             pdfUrl.value = null;
@@ -2803,7 +2821,7 @@
             submitState.value = 'idle';
             showFinalResult.value = true;
             try { localStorage.removeItem('boerseker_draft_v1'); } catch (_) {}
-            (document.getElementById('boerseker-app') || document.body).scrollIntoView({ behavior: 'smooth', block: 'start' });
+            scrollCalcToTop();
           }
 
           // Clear company fields when switching back to Individu so stale data

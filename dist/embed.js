@@ -171,7 +171,7 @@
           function goToWizardStep(n) {
             if (n < 1 || n > WIZARD_STEPS.length) return;
             wizardStep.value = n;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            (document.getElementById('boerseker-app') || document.body).scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
           function nextWizardStep() {
             if (wizardStep.value === 1 && assets.value.length === 0) return;
@@ -622,7 +622,7 @@
 
             finalResult.value = aggregate.value;
             submitState.value = 'submitting';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            (document.getElementById('boerseker-app') || document.body).scrollIntoView({ behavior: 'smooth', block: 'start' });
 
             // Generate PDF first so pdf_url can be included in the CRM payload.
             pdfUrl.value = null;
@@ -675,7 +675,7 @@
             submitState.value = 'idle';
             showFinalResult.value = true;
             try { localStorage.removeItem('boerseker_draft_v1'); } catch (_) {}
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            (document.getElementById('boerseker-app') || document.body).scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
 
           // Clear company fields when switching back to Individu so stale data

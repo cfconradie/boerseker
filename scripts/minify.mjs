@@ -125,9 +125,10 @@ ${patchedAppJs}
 await writeFile(resolve(outputDir, 'embed.js'), embedJs, 'utf8');
 
 // ── 6. Produce the 3-line snippet for the client ────────────────────────────
+const version = new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Date.now().toString(36).slice(-4);
 const snippet = `<div id="boerseker-app"></div>
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-<script src="${JSDELIVR_BASE}/embed.js"></script>
+<script src="${JSDELIVR_BASE}/embed.js?v=${version}"></script>
 `;
 await writeFile(resolve(outputDir, 'simvoly-snippet.html'), snippet, 'utf8');
 

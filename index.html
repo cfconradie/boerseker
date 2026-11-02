@@ -749,11 +749,16 @@
         border: 1.5px solid var(--color-border);
       }
       .final-action-call:hover { background: var(--color-subtle); }
-      .final-action-pdf {
+      #boerseker-app .final-action-pdf,
+      #boerseker-app .final-action-pdf:hover,
+      #boerseker-app .final-action-pdf:visited,
+      #boerseker-app .final-action-pdf:focus,
+      #boerseker-app .final-action-pdf * {
         background: var(--color-primary);
-        color: var(--color-neutral) !important;
+        color: #ffffff !important;
+        text-decoration: none !important;
       }
-      .final-action-pdf:hover { background: var(--color-primary-hover); color: var(--color-neutral) !important; }
+      #boerseker-app .final-action-pdf:hover { background: var(--color-primary-hover); }
       .final-action-pdf-loading {
         background: transparent;
         color: var(--color-muted);
@@ -761,12 +766,17 @@
         cursor: default;
         pointer-events: none;
       }
-      .final-action-facebook {
+      #boerseker-app .final-action-facebook,
+      #boerseker-app .final-action-facebook:hover,
+      #boerseker-app .final-action-facebook:visited,
+      #boerseker-app .final-action-facebook:focus,
+      #boerseker-app .final-action-facebook * {
         background: #1877f2;
-        color: #fff !important;
+        color: #ffffff !important;
+        text-decoration: none !important;
         gap: 10px;
       }
-      .final-action-facebook:hover { background: #166fe5; color: #fff !important; }
+      #boerseker-app .final-action-facebook:hover { background: #166fe5; }
       .final-ref {
         font-size: 0.75rem;
         color: var(--color-muted);

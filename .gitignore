@@ -1,5 +1,6 @@
 /docs
 /claude
+node_modules
 
 # Secrets & local config — NEVER commit
 .env
@@ -7,3 +8,5 @@
 !.env.example
 .claude/
 .cursor/
+.vercel
+.env*.local
